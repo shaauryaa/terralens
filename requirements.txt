@@ -16,6 +16,8 @@ datasets>=2.14
 # Plotting / EDA
 matplotlib>=3.7
 seaborn>=0.13
+ipykernel>=6.0      # run notebooks
+nbconvert>=7.0      # jupyter nbconvert --execute
 
 # Testing
 pytest>=7.4

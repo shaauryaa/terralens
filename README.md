@@ -49,7 +49,11 @@ terralens/
 │   ├── processed/              # derived files, not committed
 │   └── external/               # auxiliary English data, not committed
 ├── notebooks/
-│   └── 01_eda.ipynb            # EDA skeleton
+│   ├── 01_eda.ipynb            # EDA skeleton (official data)
+│   └── 01_eda_semeval.ipynb    # EDA + TF-IDF/LR pipeline check on SemEval climate (English)
+├── reports/
+│   ├── eda_semeval.md          # summary of the SemEval pipeline check (not project results)
+│   └── figures/
 ├── scripts/
 │   └── download_external.py    # fetches SemEval-2016 climate + GWSD
 ├── src/terralens/
