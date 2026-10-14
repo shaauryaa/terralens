@@ -1,0 +1,42 @@
+# TF-IDF + linear classifier baseline.
+# Run:  python -m terralens.baselines --config configs/baseline.yaml
+
+seed: 42
+
+data:
+  # Which data to cross-validate on:
+  #   "official"         -> data/raw/<train_file> (not released yet)
+  #   "semeval_climate"  -> data/external/semeval_climate.csv (pipeline smoke test only)
+  #   "gwsd"             -> data/external/gwsd.csv
+  dataset: official
+  train_file: train.csv
+  text_column: text
+  lowercase: true
+
+features:
+  word:
+    ngram_range: [1, 2]
+    min_df: 2
+    max_features: 50000
+    sublinear_tf: true
+  char:
+    analyzer: char_wb
+    ngram_range: [2, 5]
+    min_df: 2
+    max_features: 100000
+    sublinear_tf: true
+
+models:
+  logreg:
+    C: 1.0
+    max_iter: 2000
+    class_weight: balanced
+  linear_svc:
+    C: 0.5
+    class_weight: balanced
+
+cv:
+  n_splits: 5
+  shuffle: true
+
+output_dir: outputs/baseline
