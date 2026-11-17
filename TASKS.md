@@ -56,7 +56,7 @@ Then: run `search`, open the CSV, set `keep=1` on ~50 to 70 relevant videos (Cla
 
 ## T4. Label with three LLM annotators  (~1 to 2 h, mostly waiting)
 
-> Write `scripts/label_llm.py` with annotators `gemini` (GEMINI_API_KEY) and `groq` (a Llama model
+> Write `scripts/label_llm.py` with annotators `gemini` (GEMINI_API_KEY) and `groq` (`openai/gpt-oss-120b`
 > on Groq's free tier; GROQ_API_KEY), using `annotation/guidelines.md` as the system prompt and the JSON
 > output format in it. Batch 25 comments per request, retry on rate limits, resume from partial output,
 > write `data/interim/labels_<annotator>.jsonl`. Then label the same file yourself as annotator `claude`:
