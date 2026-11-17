@@ -6,12 +6,12 @@ TerraLens is a course project for **CSET 346 (Natural Language Processing), Benn
 Given a YouTube comment written in Hindi or Bengali (in native script, romanised, or code-mixed with
 English), the task is to classify its stance toward a fixed target claim as **Favour**, **Against** or
 **None**. Comments of this kind are short, noisy and multi-script, and the Against class is expected to be
-the minority. The project therefore compares classical n-gram baselines, Indic and multilingual
-transformers, and LLM prompting, and pays particular attention to minority-class performance.
+the minority. The project compares Indic and multilingual transformers and LLM prompting, and pays
+particular attention to minority-class performance.
 
-> **Status: proposed, no results yet.** The official dataset has not been released. This repository
-> currently contains the project scaffold, the preprocessing pipeline, baseline code and loaders for
-> auxiliary English data. No numbers in this repository are project results.
+> **Work in progress.** This repository is being set up for Milestone 2 (YouTube data collection,
+> LLM-assisted labelling, transformer fine-tuning). No results have been produced yet; this README will be
+> rewritten once they are.
 
 ## Target claim and labels
 
@@ -23,47 +23,43 @@ transformers, and LLM prompting, and pays particular attention to minority-class
 | **Against** | The comment opposes the claim: denial, dismissal, calling it a hoax or exaggeration, or arguing it is not a concern. |
 | **None** | The comment expresses no stance toward the claim (off-topic, neutral information, unrelated questions, spam). |
 
-## Team
-
-| Name | Role | Enrolment no. |
-|------|------|---------------|
-| Shaurya Nigam | Team Leader | S24CSEU0497 |
-| Nakshatra Bhateja | Member | S24CSEU1245 |
-| [Member 3] | Member | |
-| [Member 4] | Member | |
-
-**Mentor:** Dr. Supriya Chanda
-
 ## Repository structure
 
 ```
 terralens/
 ├── README.md
 ├── LICENSE                     # MIT
-├── requirements.txt
+├── requirements.txt            # CPU / laptop
+├── requirements-gpu.txt        # Colab T4: requirements.txt + peft, bitsandbytes
 ├── pyproject.toml              # makes src/terralens installable (pip install -e .)
-├── configs/
-│   └── baseline.yaml           # TF-IDF + LR / LinearSVC settings
+├── annotation/
+│   ├── guidelines.md           # labelling guideline
+│   └── prompts/                # LLM annotation prompts
+├── configs/                    # one YAML per experiment
 ├── data/
-│   ├── raw/                    # official shared-task CSVs (id, text, label), not committed
-│   ├── processed/              # derived files, not committed
-│   └── external/               # auxiliary English data, not committed
+│   ├── raw/                    # collected comments, not committed
+│   ├── interim/                # intermediate files, not committed
+│   ├── processed/              # final labelled data, not committed
+│   ├── external/               # auxiliary English data, not committed
+│   ├── splits/                 # train/val/test id lists (split by video)
+│   └── challenge/              # robustness / hard-case set
 ├── notebooks/
-│   ├── 01_eda.ipynb            # EDA skeleton (official data)
-│   └── 01_eda_semeval.ipynb    # EDA + TF-IDF/LR pipeline check on SemEval climate (English)
+│   ├── 01_eda.ipynb            # EDA skeleton
+│   └── 01_eda_semeval.ipynb    # EDA on SemEval climate (English, auxiliary)
 ├── reports/
-│   ├── eda_semeval.md          # summary of the SemEval pipeline check (not project results)
+│   ├── eda_semeval.md          # SemEval EDA summary (not project results)
 │   └── figures/
+├── results/                    # one JSON per experiment
 ├── scripts/
 │   └── download_external.py    # fetches SemEval-2016 climate + GWSD
 ├── src/terralens/
 │   ├── data.py                 # loaders and label mapping
 │   ├── preprocess.py           # normalisation and script tagging
-│   ├── baselines.py            # TF-IDF + LR / LinearSVC, stratified 5-fold CV
 │   ├── evaluate.py             # macro F1, Against F1, per-class, confusion matrix, per-language
-│   └── predict.py              # writes predictions (id, label)
+│   ├── predict.py              # writes predictions (id, label)
+│   └── models/                 # encoder fine-tuning, LLM prompting
+├── legacy/                     # early TF-IDF baseline code, kept for reference only
 └── tests/
-    └── test_preprocess.py
 ```
 
 ## Setup
@@ -75,28 +71,15 @@ cd terralens
 python -m venv .venv
 # Windows: .venv\Scripts\activate    Linux/macOS: source .venv/bin/activate
 
-pip install -r requirements.txt
+pip install -r requirements.txt       # on Colab: pip install -r requirements-gpu.txt
 pip install -e .                      # so `python -m terralens.*` works from anywhere
 
 python scripts/download_external.py   # auxiliary English data -> data/external/
 pytest                                 # unit tests
 ```
 
-`torch` and `transformers` are only needed for the transformer fine-tuning stage. They can be skipped
-while working on the classical baselines.
-
-### Running
-
-```bash
-# Baselines with stratified 5-fold CV on the official training set (once released, in data/raw/train.csv)
-python -m terralens.baselines --config configs/baseline.yaml
-
-# Same pipeline on an external dataset (pipeline check only, not a project result)
-python -m terralens.baselines --config configs/baseline.yaml --dataset semeval_climate
-
-# Predictions file with columns id,label
-python -m terralens.predict --train data/raw/train.csv --test data/raw/test.csv --out outputs/predictions.csv
-```
+API keys (`YOUTUBE_API_KEY`, `GEMINI_API_KEY`, `GROQ_API_KEY`) go in a `.env` file at the repo root,
+which is git-ignored.
 
 ## Datasets
 
@@ -167,8 +150,7 @@ The schedule after 20 Oct depends on when the official dataset is released.
 
 ## Status
 
-**Proposed, no results yet.** Results will be added here once the official dataset is available
-and experiments have been run.
+**Work in progress, no results yet.**
 
 ## License
 

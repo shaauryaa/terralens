@@ -1,5 +1,5 @@
-# TF-IDF + linear classifier baseline.
-# Run:  python -m terralens.baselines --config configs/baseline.yaml
+# LEGACY: TF-IDF + linear classifier baseline (not part of Milestone 2 results).
+# Run from the repo root:  python -m legacy.baselines --config legacy/configs/baseline.yaml
 
 seed: 42
 

@@ -1,9 +1,11 @@
-"""TF-IDF (word 1-2 + char 2-5 n-grams) + LogisticRegression / LinearSVC baselines,
+"""LEGACY. TF-IDF (word 1-2 + char 2-5 n-grams) + LogisticRegression / LinearSVC baselines,
 evaluated with stratified k-fold cross-validation.
 
-Usage:
-    python -m terralens.baselines --config configs/baseline.yaml
-    python -m terralens.baselines --config configs/baseline.yaml --dataset semeval_climate
+Kept for reference only; classical models are not part of the Milestone 2 results.
+
+Usage (from the repo root):
+    python -m legacy.baselines --config legacy/configs/baseline.yaml
+    python -m legacy.baselines --config legacy/configs/baseline.yaml --dataset semeval_climate
 """
 
 from __future__ import annotations
@@ -137,7 +139,7 @@ def load_dataset_for_cv(config: dict, dataset: str | None = None) -> pd.DataFram
 
 def main(argv=None) -> None:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("--config", default="configs/baseline.yaml")
+    parser.add_argument("--config", default="legacy/configs/baseline.yaml")
     parser.add_argument("--dataset", default=None, help="override data.dataset (official | semeval_climate | gwsd)")
     parser.add_argument("--models", nargs="+", default=None, help="subset of models in the config")
     args = parser.parse_args(argv)

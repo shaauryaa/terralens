@@ -1,4 +1,4 @@
-# SemEval-2016 climate: EDA and baseline summary
+# SemEval-2016 climate: EDA summary
 
 > **English auxiliary data (SemEval-2016 climate). Pipeline check only, not TerraLens results.**
 > These are English tweets used as auxiliary data. Nothing here measures performance on the Hindi/Bengali
@@ -19,7 +19,8 @@
 ![Label distribution per split](figures/semeval_label_distribution.png)
 
 - **Against is tiny**: 26 tweets overall (4.6%),
-  and only 11 in test, so Against-class metrics on this set are very noisy.
+  and only 11 in test, so Against-class metrics on this set
+  would be very noisy.
 - Tweets are short: median 17 words, mean 16.6.
 
 | label | count | mean | median | min | max |
@@ -44,53 +45,5 @@ masked as `@user`, and URLs and emojis were stripped upstream, so the URL/emoji 
 - None: i'm (13), peace (13), like (11), just (11), it's (9), way (8), regards (7), new (7), don't (7), democracy (7)
 
 ![Top words per label](figures/semeval_top_words.png)
-
-## Baseline (train+validation → test)
-
-TF-IDF word 1-2-grams + char_wb 2-5-grams (`FeatureUnion`, `min_df=2`, sublinear TF) + `LogisticRegression(class_weight="balanced", max_iter=1000)`,
-compared with a majority-class (`Favour`) baseline. Trained on 395 tweets, evaluated once on 169 test tweets.
-
-| model | accuracy | macro_f1 | against_f1 |
-|---|---|---|---|
-| Majority class | 0.728 | 0.281 | 0.0 |
-| TF-IDF + LR | 0.698 | 0.418 | 0.0 |
-
-TF-IDF + LR per-class results on test:
-
-| class | precision | recall | f1-score | support |
-|---|---|---|---|---|
-| Favour | 0.795 | 0.821 | 0.808 | 123 |
-| Against | 0.0 | 0.0 | 0.0 | 11 |
-| None | 0.415 | 0.486 | 0.447 | 35 |
-
-**Against-class F1 (TF-IDF + LR): 0.000** (majority baseline: 0.000).
-
-| gold | pred Favour | pred Against | pred None |
-|---|---|---|---|
-| Favour | 101 | 1 | 21 |
-| Against | 8 | 0 | 3 |
-| None | 18 | 0 | 17 |
-
-![Confusion matrices](figures/semeval_confusion_matrix.png)
-
-Top LR features per class:
-
-- Favour: w:we, w:and, w:water, w:climate, w:green, w:by, w:to be, w:environment, w:emissions, w:right
-- Against: w:change, w:10, w:in 10, w:the climate, w:global warming, w:an, w:warming, w:climate change, w:global, w:climate
-- None: w:i, w:my, w:more, w:can, w:re, w:this, w:about, w:lovewins, w:he, w:other
-
-![Top LR features](figures/semeval_lr_top_features.png)
-
-## Takeaways
-
-- The EDA → preprocessing → TF-IDF → LR → evaluation pipeline runs end to end and the figures and metrics are produced
-  in the format planned for the official data.
-- LR beats the majority baseline on macro F1 (0.418 vs 0.281).
-- Against F1 is 0.000: LR predicted Against 1 time(s) and recovered
-  0 of 11 gold Against tweets. With only
-  15 Against tweets in training, class weighting alone is not enough, and with
-  11 in test a single prediction moves Against F1 a lot.
-  SemEval climate is too small and too imbalanced to say much about the Against class; GWSD (400 Against) is the better
-  English source for that.
 
 *English auxiliary data (SemEval-2016 climate). Pipeline check only, not TerraLens results.*

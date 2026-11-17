@@ -1,16 +1,40 @@
+# --- Secrets (never commit) ---
+.env
+.env.*
+!.env.example
+
 # --- Project data and artifacts (never commit) ---
+# data/raw/, data/interim/ and data/external/ are ignored except for their README / .gitkeep.
 data/raw/*
+data/interim/*
 data/processed/*
 data/external/*
 !data/raw/.gitkeep
 !data/raw/README.md
+!data/interim/.gitkeep
 !data/processed/.gitkeep
 !data/processed/README.md
 !data/external/.gitkeep
 !data/external/README.md
-models/
 outputs/
-.env
+
+# --- Model checkpoints and weights (never commit) ---
+# Root-level only, so src/terralens/models/ (code) is not ignored.
+/models/
+/checkpoints/
+checkpoint-*/
+runs/
+wandb/
+*.safetensors
+*.bin
+*.pt
+*.pth
+*.ckpt
+*.gguf
+*.onnx
+
+# --- Claude Code (per-user) ---
+.claude/settings.local.json
 
 # --- Python ---
 __pycache__/

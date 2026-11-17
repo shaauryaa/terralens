@@ -1,0 +1,6 @@
+# GPU (Colab T4) requirements: everything in requirements.txt plus QLoRA / 4-bit packages.
+# Usage on Colab:  pip install -r requirements-gpu.txt
+-r requirements.txt
+
+peft>=0.10              # LoRA / QLoRA adapters
+bitsandbytes>=0.43      # 4-bit / 8-bit quantisation (CUDA only)

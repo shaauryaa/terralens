@@ -1,0 +1,50 @@
+# Search queries for scripts/collect_youtube.py (YouTube Data API v3).
+# Each search.list call costs 100 quota units (10,000/day free), so keep queries <= ~40 per day.
+# The script lists candidate videos first (title, channel, comment count) for review,
+# then fetches comments only for approved videos (commentThreads.list: 1 unit per 100 comments).
+
+settings:
+  max_results_per_query: 15        # videos per query
+  min_comment_count: 30            # skip videos with too few comments
+  max_comments_per_video: 150      # cap so no video dominates
+  published_after: "2019-01-01T00:00:00Z"
+  region_code: IN                  # Bengali queries also run with BD (see below)
+
+hindi:
+  relevance_language: hi
+  queries:
+    # mainstream / news / explainers
+    - "जलवायु परिवर्तन"
+    - "ग्लोबल वार्मिंग"
+    - "climate change hindi"
+    - "global warming in hindi"
+    - "हीटवेव भारत"
+    - "बढ़ती गर्मी जलवायु परिवर्तन"
+    - "ग्लेशियर पिघल रहे हैं"
+    - "बाढ़ जलवायु परिवर्तन"
+    - "climate change kisan"
+    - "प्रदूषण और ग्लोबल वार्मिंग"
+    # sceptic-leaning, to find Against comments
+    - "ग्लोबल वार्मिंग झूठ"
+    - "climate change propaganda hindi"
+    - "global warming scam"
+    - "climate change sach ya jhooth"
+    - "क्या ग्लोबल वार्मिंग एक धोखा है"
+
+bengali:
+  relevance_language: bn
+  region_codes: [IN, BD]
+  queries:
+    - "জলবায়ু পরিবর্তন"
+    - "বৈশ্বিক উষ্ণায়ন"
+    - "গ্লোবাল ওয়ার্মিং"
+    - "climate change bangla"
+    - "তাপপ্রবাহ"
+    - "বন্যা জলবায়ু পরিবর্তন"
+    - "ঘূর্ণিঝড় জলবায়ু পরিবর্তন"
+    - "সুন্দরবন জলবায়ু পরিবর্তন"
+    - "সমুদ্রের উচ্চতা বৃদ্ধি বাংলাদেশ"
+    # sceptic-leaning
+    - "গ্লোবাল ওয়ার্মিং মিথ্যা"
+    - "জলবায়ু পরিবর্তন গুজব"
+    - "climate change hoax bangla"
