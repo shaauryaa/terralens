@@ -4,7 +4,7 @@
 # then fetches comments only for approved videos (commentThreads.list: 1 unit per 100 comments).
 
 settings:
-  max_results_per_query: 15        # videos per query
+  max_results_per_query: 50        # videos per query (API max; costs the same 100 units as 15)
   min_comment_count: 30            # skip videos with too few comments
   max_comments_per_video: 150      # cap so no video dominates
   published_after: "2019-01-01T00:00:00Z"

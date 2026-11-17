@@ -1,0 +1,32 @@
+{
+  "_comment": "Synthetic sample in the YouTube Data API v3 videos.list (part=snippet,statistics) format (no real data).",
+  "kind": "youtube#videoListResponse",
+  "etag": "x",
+  "items": [
+    {
+      "kind": "youtube#video",
+      "etag": "a",
+      "id": "AAAAAAAAAA1",
+      "snippet": {
+        "publishedAt": "2023-05-01T10:00:00Z",
+        "channelId": "UCchannel000000000000001",
+        "title": "जलवायु परिवर्तन क्या है?",
+        "channelTitle": "Example News Hindi"
+      },
+      "statistics": {"viewCount": "12000", "likeCount": "300", "favoriteCount": "0", "commentCount": "245"}
+    },
+    {
+      "kind": "youtube#video",
+      "etag": "c",
+      "id": "-BBBBBBBBB2",
+      "snippet": {
+        "publishedAt": "2022-07-15T08:30:00Z",
+        "channelId": "UCchannel000000000000003",
+        "title": "Global warming & heatwave",
+        "channelTitle": "Example Explainers"
+      },
+      "statistics": {"viewCount": "900", "likeCount": "20", "favoriteCount": "0"}
+    }
+  ],
+  "pageInfo": {"totalResults": 2, "resultsPerPage": 2}
+}

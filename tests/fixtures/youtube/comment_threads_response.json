@@ -1,0 +1,98 @@
+{
+  "_comment": "Synthetic sample in the YouTube Data API v3 commentThreads.list (part=snippet,replies) format (no real data).",
+  "kind": "youtube#commentThreadListResponse",
+  "etag": "x",
+  "nextPageToken": "QURTSl9pM",
+  "pageInfo": {"totalResults": 2, "resultsPerPage": 100},
+  "items": [
+    {
+      "kind": "youtube#commentThread",
+      "etag": "t1",
+      "id": "UgxThread0001",
+      "snippet": {
+        "channelId": "UCchannel000000000000001",
+        "videoId": "AAAAAAAAAA1",
+        "topLevelComment": {
+          "kind": "youtube#comment",
+          "etag": "c1",
+          "id": "UgxThread0001",
+          "snippet": {
+            "channelId": "UCchannel000000000000001",
+            "videoId": "AAAAAAAAAA1",
+            "textDisplay": "global warming sab jhooth hai, garmi to hamesha thi",
+            "textOriginal": "global warming sab jhooth hai, garmi to hamesha thi",
+            "authorDisplayName": "@SomeViewer-ab1",
+            "authorProfileImageUrl": "https://yt3.ggpht.com/example",
+            "authorChannelUrl": "http://www.youtube.com/@SomeViewer-ab1",
+            "authorChannelId": {"value": "UCauthor0000000000000001"},
+            "canRate": true,
+            "viewerRating": "none",
+            "likeCount": 12,
+            "publishedAt": "2023-05-02T09:00:00Z",
+            "updatedAt": "2023-05-02T09:00:00Z"
+          }
+        },
+        "canReply": true,
+        "totalReplyCount": 1,
+        "isPublic": true
+      },
+      "replies": {
+        "comments": [
+          {
+            "kind": "youtube#comment",
+            "etag": "r1",
+            "id": "UgxThread0001.Reply0001",
+            "snippet": {
+              "channelId": "UCchannel000000000000001",
+              "videoId": "AAAAAAAAAA1",
+              "textDisplay": "@SomeViewer-ab1 नहीं भाई, जलवायु परिवर्तन सच है",
+              "textOriginal": "@SomeViewer-ab1 नहीं भाई, जलवायु परिवर्तन सच है",
+              "parentId": "UgxThread0001",
+              "authorDisplayName": "@OtherViewer.xy",
+              "authorProfileImageUrl": "https://yt3.ggpht.com/example2",
+              "authorChannelUrl": "http://www.youtube.com/@OtherViewer.xy",
+              "authorChannelId": {"value": "UCauthor0000000000000002"},
+              "canRate": true,
+              "viewerRating": "none",
+              "likeCount": 3,
+              "publishedAt": "2023-05-02T10:00:00Z",
+              "updatedAt": "2023-05-02T10:00:00Z"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "kind": "youtube#commentThread",
+      "etag": "t2",
+      "id": "UgxThread0002",
+      "snippet": {
+        "channelId": "UCchannel000000000000001",
+        "videoId": "AAAAAAAAAA1",
+        "topLevelComment": {
+          "kind": "youtube#comment",
+          "etag": "c2",
+          "id": "UgxThread0002",
+          "snippet": {
+            "channelId": "UCchannel000000000000001",
+            "videoId": "AAAAAAAAAA1",
+            "textDisplay": "बहुत अच्छी जानकारी, mail me at a@b.com",
+            "textOriginal": "बहुत अच्छी जानकारी, mail me at a@b.com",
+            "authorDisplayName": "@ThirdViewer",
+            "authorProfileImageUrl": "https://yt3.ggpht.com/example3",
+            "authorChannelUrl": "http://www.youtube.com/@ThirdViewer",
+            "authorChannelId": {"value": "UCauthor0000000000000003"},
+            "canRate": true,
+            "viewerRating": "none",
+            "likeCount": 0,
+            "publishedAt": "2023-05-03T11:00:00Z",
+            "updatedAt": "2023-05-03T11:00:00Z"
+          }
+        },
+        "canReply": true,
+        "totalReplyCount": 0,
+        "isPublic": true
+      }
+    }
+  ]
+}

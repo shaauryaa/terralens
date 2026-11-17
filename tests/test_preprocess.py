@@ -28,6 +28,13 @@ def test_mention_removal_keeps_emails_intact():
     assert remove_mentions("mail me at a@b.com @user.name") == "mail me at a@b.com  "
 
 
+def test_mention_removal_covers_indic_handles():
+    # Vowel signs like "ा" / "ু" are not \w; the whole handle must still be removed.
+    assert remove_mentions("@राम_भाई सही") == "  सही"
+    assert remove_mentions("@সুমন দা") == "  দা"
+    assert remove_mentions("राम@डाक.भारत") == "राम@डाक.भारत"  # e-mail-like, not a handle
+
+
 def test_remove_urls_only():
     assert remove_urls("link: http://t.co/abc done") == "link:   done"
 

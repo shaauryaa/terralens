@@ -1,0 +1,44 @@
+{
+  "_comment": "Synthetic sample in the YouTube Data API v3 search.list format (no real data).",
+  "kind": "youtube#searchListResponse",
+  "etag": "x",
+  "nextPageToken": "CAIQAA",
+  "regionCode": "IN",
+  "pageInfo": {"totalResults": 1000000, "resultsPerPage": 3},
+  "items": [
+    {
+      "kind": "youtube#searchResult",
+      "etag": "a",
+      "id": {"kind": "youtube#video", "videoId": "AAAAAAAAAA1"},
+      "snippet": {
+        "publishedAt": "2023-05-01T10:00:00Z",
+        "channelId": "UCchannel000000000000001",
+        "title": "जलवायु परिवर्तन क्या है?",
+        "description": "...",
+        "channelTitle": "Example News Hindi",
+        "liveBroadcastContent": "none",
+        "publishTime": "2023-05-01T10:00:00Z"
+      }
+    },
+    {
+      "kind": "youtube#searchResult",
+      "etag": "b",
+      "id": {"kind": "youtube#channel", "channelId": "UCchannel000000000000002"},
+      "snippet": {"publishedAt": "2020-01-01T00:00:00Z", "title": "A channel", "channelTitle": "A channel"}
+    },
+    {
+      "kind": "youtube#searchResult",
+      "etag": "c",
+      "id": {"kind": "youtube#video", "videoId": "-BBBBBBBBB2"},
+      "snippet": {
+        "publishedAt": "2022-07-15T08:30:00Z",
+        "channelId": "UCchannel000000000000003",
+        "title": "Global warming &amp; heatwave",
+        "description": "...",
+        "channelTitle": "Example Explainers",
+        "liveBroadcastContent": "none",
+        "publishTime": "2022-07-15T08:30:00Z"
+      }
+    }
+  ]
+}

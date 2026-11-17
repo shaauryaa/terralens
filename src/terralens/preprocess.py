@@ -24,8 +24,10 @@ import regex as re
 
 URL_RE = re.compile(r"(?:https?://|www\.)\S+", re.IGNORECASE)
 HTML_TAG_RE = re.compile(r"<[^>]+>")
-# Handles like @user, @user.name, @user-name; not e-mail addresses (no word char before '@').
-MENTION_RE = re.compile(r"(?<!\w)@[\w.\-]+")
+# Handles like @user, @user.name, @user-name, @राम; not e-mail addresses (no word char before '@').
+# \w misses Devanagari/Bengali vowel signs (e.g. "ा"), so those Unicode blocks are listed explicitly.
+INDIC_CHARS = "ऀ-ॿঀ-৿"
+MENTION_RE = re.compile(rf"(?<![\w{INDIC_CHARS}])@[\w.\-{INDIC_CHARS}]+")
 ELONGATION_RE = re.compile(r"(.)\1{2,}", re.DOTALL)
 WHITESPACE_RE = re.compile(r"\s+")
 
