@@ -33,6 +33,11 @@ seaborn>=0.13
 ipykernel>=6.0      # run notebooks
 nbconvert>=7.0      # jupyter nbconvert --execute
 
+# Progress report PDF (scripts/build_report.py); pymupdf only renders page previews
+reportlab>=4.0
+pypdf>=4.0
+pymupdf>=1.24
+
 # Kaggle GPU jobs (scripts/kaggle_jobs.py)
 kaggle>=1.7
 

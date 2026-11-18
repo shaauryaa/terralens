@@ -268,8 +268,11 @@ python -m terralens.robustness results/e3_best_plus_bcd_robust.json results/e3_b
 python -m terralens.robustness results/e4_qlora_robust.json --out results/robustness_e4_qlora.json
 python scripts/error_analysis.py sample
 python scripts/error_analysis.py notebook
+python scripts/error_analysis.py summary
 python scripts/make_results_table.py
 python scripts/plot_results.py
+python scripts/make_report_figures.py      # progress-report figures
+python scripts/build_report.py             # reports/progress_report.pdf (2 A4 pages)
 ```
 
 ## Repository layout

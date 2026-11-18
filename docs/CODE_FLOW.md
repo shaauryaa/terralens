@@ -66,8 +66,11 @@ repo root. `data/raw/`, `data/interim/`, `data/external/`, `data/processed/`, `d
 | 6.1 | `python -m terralens.robustness` | `results/*_robust.json` and seed runs | Clean vs noisy test drop, challenge-set scores per phenomenon, mean ± std over runs | `results/robustness_<exp>.json` |
 | 6.2 | `scripts/error_analysis.py sample` | best run's val predictions, `source_a.csv`, `GEMINI_API_KEY` | Picks the best run by val, samples 40 misclassified val comments, gets English glosses | `data/interim/error_sample.csv`, `data/interim/error_glosses.jsonl` |
 | 6.3 | `scripts/error_analysis.py notebook` | sample, glosses, `reports/error_categories.csv` (hand-assigned) | Builds and runs the error-analysis notebook (glosses, labels and categories only) | `notebooks/03_error_analysis.ipynb` |
+| 6.3b | `scripts/error_analysis.py summary` | sample, `reports/error_categories.csv`, best run's val predictions | Counts the sampled gold → prediction pairs and the hand-assigned error categories (no comment text) | `results/error_analysis.json` |
 | 6.4 | `scripts/make_results_table.py` | `results/*.json` | Main table, per-language/script scores, seed variance, robustness, data summary | `reports/results.md` |
 | 6.5 | `scripts/plot_results.py` | `results/*.json` | Test Macro F1 with 95% CI per system; marks the best system on val | `reports/figures/results_macro_f1.png` |
+| 6.6 | `scripts/make_report_figures.py` | `results/*.json` (cleaning, agreement, dataset stats, E4, robustness) | Draws the progress-report figures with one class palette (pipeline, class mix, script mix, results, E4 confusion matrix, robustness) | `reports/figures/report_*.png` |
+| 6.7 | `scripts/build_report.py` | `reports/progress_report.md`, report figures | Lays out the report as an A4 PDF with reportlab and scales it until pypdf counts exactly 2 pages; `--preview` renders PNGs | `reports/progress_report.pdf` |
 
 ## Library modules (`src/terralens/`)
 

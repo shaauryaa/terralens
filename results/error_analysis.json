@@ -1,0 +1,36 @@
+{
+  "experiment_id": "error_analysis",
+  "script": "scripts/error_analysis.py",
+  "timestamp": "2026-11-18T23:03:56+00:00",
+  "seed": 42,
+  "config": {
+    "split": "val",
+    "n_sample": 40,
+    "categories": "assigned by hand from English glosses"
+  },
+  "run": "e4_qlora",
+  "val_comments": 522,
+  "val_errors": 68,
+  "sampled": 40,
+  "pairs": {
+    "None->Favour": 20,
+    "Favour->None": 7,
+    "None->Against": 4,
+    "Against->None": 4,
+    "Favour->Against": 3,
+    "Against->Favour": 2
+  },
+  "categories": {
+    "blame, politics or conspiracy": 6,
+    "topic, not target (pollution, population, trees)": 5,
+    "generic agreement or praise": 5,
+    "needs video context": 4,
+    "sarcasm": 4,
+    "implicit stance": 4,
+    "weather facts without stance": 3,
+    "cause attribution read as denial": 3,
+    "request or question about the topic": 3,
+    "possible label noise": 2,
+    "video praise mixed with topic": 1
+  }
+}

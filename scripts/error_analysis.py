@@ -6,6 +6,8 @@ Subcommands
               glosses from Gemini (cached in data/interim/error_glosses.jsonl; 2 requests)
     notebook  build and execute notebooks/03_error_analysis.ipynb: confusion matrix, Macro F1 per language /
               script / annotator tag, and the 40 examples (English gloss, gold, prediction, category)
+    summary   write results/error_analysis.json: run, number of val errors, the sampled gold -> prediction pairs
+              and the hand-assigned category counts (no comment text)
 
 Categories are assigned by hand (in the Claude Code session) after reading the glosses and saved in
 reports/error_categories.csv (id, category). Only ids, labels, glosses and categories appear in the notebook;
@@ -14,6 +16,7 @@ the original comment text stays in data/interim/error_sample.csv (not in git).
 Usage:
     python scripts/error_analysis.py sample
     python scripts/error_analysis.py notebook
+    python scripts/error_analysis.py summary
     python scripts/error_analysis.py sample --limit 1      # dry run: show the chosen run, no requests
 """
 
@@ -32,6 +35,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 sys.path.insert(0, str(ROOT / "scripts"))
 
+from terralens.reporting import now  # noqa: E402
 from terralens.splits import load_splits  # noqa: E402
 
 RESULTS = ROOT / "results"
@@ -127,6 +131,30 @@ print("Best run by val Macro F1:", RUN, "| val Macro F1", res["val"]["macro_f1"]
 '''
 
 
+def summarise(sample: pd.DataFrame, categories: pd.DataFrame, run: str, n_val: int, n_wrong: int) -> dict:
+    """Counts only: sampled pairs and hand-assigned categories of the sampled val errors."""
+    cats = sample[["id"]].merge(categories, on="id", how="left")["category"].fillna("uncategorised")
+    return {"experiment_id": "error_analysis", "script": "scripts/error_analysis.py", "timestamp": now(), "seed": SEED,
+            "config": {"split": "val", "n_sample": N, "categories": "assigned by hand from English glosses"},
+            "run": run, "val_comments": n_val, "val_errors": n_wrong, "sampled": len(sample),
+            "pairs": {k: int(v) for k, v in sample["pair"].value_counts().items()},
+            "categories": {k: int(v) for k, v in cats.value_counts().items()}}
+
+
+def cmd_summary(args) -> None:
+    sample = pd.read_csv(SAMPLE_CSV, dtype=str, keep_default_na=False)
+    run = sample["run"].iloc[0]
+    pred = pd.read_csv(RESULTS / "predictions" / f"{run}_val.csv", dtype=str, keep_default_na=False)
+    cats = pd.read_csv(CATEGORIES_CSV, dtype=str, keep_default_na=False)
+    out = summarise(sample, cats, run, len(pred), int((pred["gold"] != pred["pred"]).sum()))
+    print(json.dumps({k: out[k] for k in ("run", "val_errors", "sampled", "categories")}, indent=1))
+    if args.limit:
+        print("Dry run: nothing written.")
+        return
+    (RESULTS / "error_analysis.json").write_text(json.dumps(out, indent=2) + "\n", encoding="utf-8")
+    print("wrote results/error_analysis.json")
+
+
 def cmd_notebook(args) -> None:
     import nbformat as nbf
 
@@ -166,8 +194,10 @@ def main(argv=None) -> None:
     s = sub.add_parser("sample")
     s.add_argument("--limit", type=int, default=None)
     sub.add_parser("notebook")
+    sm = sub.add_parser("summary")
+    sm.add_argument("--limit", type=int, default=None, help="dry run: print, write nothing")
     args = p.parse_args(argv)
-    {"sample": cmd_sample, "notebook": cmd_notebook}[args.cmd](args)
+    {"sample": cmd_sample, "notebook": cmd_notebook, "summary": cmd_summary}[args.cmd](args)
 
 
 if __name__ == "__main__":
