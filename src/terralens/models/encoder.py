@@ -15,6 +15,7 @@ Outputs
 Usage:
     python -m terralens.models.encoder --config configs/e2_xlmr.yaml
     python -m terralens.models.encoder --config configs/e2_xlmr.yaml --seed 43        # exp_id gets _s43
+    python -m terralens.models.encoder --config configs/e2_mmbert.yaml --exp-suffix _robust         --extra-eval challenge=data/challenge/challenge.csv test_noisy=data/processed/test_noisy.csv
     python -m terralens.models.encoder --config configs/e2_xlmr.yaml --limit 64 \\
         --model hf-internal-testing/tiny-random-xlm-roberta                              # CPU dry run
 """
@@ -28,11 +29,12 @@ import time
 from pathlib import Path
 
 import numpy as np
+import pandas as pd
 import yaml
 
 from terralens import CLAIM, LABEL2ID, LABELS
 from terralens.reporting import ROOT, environment, split_metrics, write_predictions, write_result
-from terralens.splits import load_splits
+from terralens.splits import load_splits, normalise_frame
 from terralens.thresholds import predict_labels, tune_offsets
 
 DEFAULTS = {
@@ -51,6 +53,8 @@ DEFAULTS = {
     "extra_train": [],
     "eval_batch_size": 64,
     "n_boot": 1000,
+    "extra_eval": {},
+    "exp_suffix": "",
 }
 
 
@@ -197,7 +201,8 @@ def train_and_evaluate(cfg: dict, limit: int | None = None, results_dir: Path | 
     val_pred, test_pred = predict_labels(val_logits), predict_labels(test_logits)
     val_pred_t, test_pred_t = predict_labels(val_logits, offsets), predict_labels(test_logits, offsets)
     nb, seed = cfg["n_boot"], cfg["seed"]
-    exp_id = cfg["exp_id"] + (f"_s{seed}" if seed != 42 else "") + (f"_dryrun{limit}" if limit else "")
+    exp_id = (cfg["exp_id"] + (f"_s{seed}" if seed != 42 else "") + cfg.get("exp_suffix", "")
+              + (f"_dryrun{limit}" if limit else ""))
     payload = {
         "kind": "encoder",
         "config": {k: v for k, v in cfg.items() if k != "exp_id"},
@@ -224,6 +229,22 @@ def train_and_evaluate(cfg: dict, limit: int | None = None, results_dir: Path | 
     }
     rd = Path(results_dir) if results_dir else (ROOT / "outputs" / "dryrun" if limit else ROOT / "results")
     pdir = Path(pred_dir) if pred_dir else rd / "predictions"
+    # Extra evaluation-only sets (challenge set, noisy test copy): reported, never used for any choice.
+    for name, rel in (cfg.get("extra_eval") or {}).items():
+        path_e = ROOT / rel
+        if not path_e.exists():
+            print(f"  extra eval {name}: {rel} not found, skipped", flush=True)
+            continue
+        df_e = normalise_frame(pd.read_csv(path_e, dtype=str, keep_default_na=False))
+        if limit:
+            df_e = df_e.head(limit)
+        loader_e = DataLoader(mk(df_e), batch_size=cfg["eval_batch_size"], collate_fn=collate)
+        logits_e = predict_logits(model, loader_e, device, fp16)
+        pred_e, pred_e_t = predict_labels(logits_e), predict_labels(logits_e, offsets)
+        payload.setdefault("extra_eval", {})[name] = {"source": rel, "plain": split_metrics(df_e, pred_e, nb, seed),
+                                                      "tuned": split_metrics(df_e, pred_e_t, nb, seed)}
+        write_predictions(exp_id, name, df_e, pred_e, logits_e, pdir, {"pred_tuned": pred_e_t})
+        print(f"  extra eval {name}: n={len(df_e)} macroF1={payload['extra_eval'][name]['plain']['macro_f1']}", flush=True)
     path = write_result(exp_id, payload, rd)
     write_predictions(exp_id, "val", val, val_pred, val_logits, pdir, {"pred_tuned": val_pred_t})
     write_predictions(exp_id, "test", test, test_pred, test_logits, pdir, {"pred_tuned": test_pred_t})
@@ -245,9 +266,14 @@ def main(argv=None) -> None:
     p.add_argument("--limit", type=int, default=None, help="dry run: N rows per split; writes to outputs/dryrun/")
     p.add_argument("--results-dir", default=None)
     p.add_argument("--save-model-dir", default=None, help="also save the best model here (not in git)")
+    p.add_argument("--extra-eval", nargs="*", default=None, metavar="NAME=PATH",
+                   help="evaluation-only CSVs, e.g. challenge=data/challenge/challenge.csv")
+    p.add_argument("--exp-suffix", default=None, help="appended to exp_id (e.g. _robust)")
     args = p.parse_args(argv)
     cfg = load_config(args.config, {"seed": args.seed, "model_name": args.model, "epochs": args.epochs,
-                                    "save_model_dir": args.save_model_dir})
+                                    "save_model_dir": args.save_model_dir, "exp_suffix": args.exp_suffix})
+    if args.extra_eval:
+        cfg["extra_eval"] = dict(kv.split("=", 1) for kv in args.extra_eval)
     if args.limit:
         cfg["n_boot"] = 50
     train_and_evaluate(cfg, limit=args.limit, results_dir=args.results_dir)

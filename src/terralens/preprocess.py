@@ -70,6 +70,27 @@ def collapse_whitespace(text: str) -> str:
     return WHITESPACE_RE.sub(" ", text).strip()
 
 
+MOJIBAKE_RE = re.compile(r"â€|Ã[\x80-\xbf]|Â[\x80-\xbf ]|ðŸ")
+LOSSY_RE = re.compile(r"ðŸ[^\s]?[-]?|â[-]¤ï¸[-]?|[-]")
+
+
+def has_mojibake(text: str) -> bool:
+    """True if ``text`` contains typical UTF-8-read-as-cp1252 sequences (e.g. "â€¦" for "…")."""
+    return bool(MOJIBAKE_RE.search(str(text)))
+
+
+def repair_mojibake(text: str) -> str:
+    """Repair mojibake with ftfy (e.g. "â€¦" -> "…", "â€™" -> "’"). Other text is returned unchanged."""
+    import ftfy
+
+    text = ftfy.fix_text(str(text), unescape_html=False, normalization="NFC")
+    # Lossy leftovers ftfy cannot undo (a byte was replaced by a private-use character): closing quote,
+    # broken emoji fragments, stray private-use characters.
+    text = text.replace("â€", "”")
+    text = LOSSY_RE.sub("", text)
+    return text
+
+
 def clean_text(text: str, lowercase: bool = False) -> str:
     """Run the full normalisation pipeline on one comment.
 

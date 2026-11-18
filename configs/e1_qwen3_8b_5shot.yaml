@@ -1,0 +1,10 @@
+# E1: Qwen3-8B, 5-shot prompting in 4-bit (few-shot examples from train only).
+exp_id: e1_qwen3_8b_5shot
+model_name: Qwen/Qwen3-8B
+shots: 5
+shot_quota: {Favour: 2, Against: 2, None: 1}
+load_in_4bit: true
+compute_dtype: float16
+batch_size: 8
+max_new_tokens: 8
+seed: 42

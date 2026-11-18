@@ -67,3 +67,14 @@ def test_preprocess_df_adds_columns():
     out = preprocess_df(df, lowercase=True)
     assert list(out["clean_text"]) == ["hott :fire:", ""]
     assert list(out["script"]) == ["latin", "other"]
+
+
+def test_repair_mojibake_fixes_common_sequences():
+    from terralens.preprocess import has_mojibake, repair_mojibake
+
+    assert repair_mojibake("Itâ€™s warming â€¦") == "It's warming …"  # ftfy also straightens quotes
+    assert repair_mojibake('"dangerousâ€ on climate') == '"dangerous” on climate'
+    assert not has_mojibake(repair_mojibake("slays! ðŸ˜ðŸ˜ Give it a watch"))
+    assert repair_mojibake("जलवायु परिवर्तन") == "जलवायु परिवर्तन"
+    assert repair_mojibake("a &amp; b") == "a &amp; b"  # HTML is left to clean_text
+    assert has_mojibake("Itâ€™s") and not has_mojibake("It’s")

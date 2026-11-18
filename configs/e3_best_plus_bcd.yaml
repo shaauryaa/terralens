@@ -1,0 +1,18 @@
+# E3: best E2 encoder (mmBERT) + translated (B) + romanised (C) + synthetic (D) data, all training only.
+exp_id: e3_best_plus_bcd
+model_name: jhu-clsp/mmBERT-base
+max_length: 128
+lr: 2.0e-5
+batch_size: 32
+grad_accum: 1
+epochs: 4
+warmup_ratio: 0.1
+weight_decay: 0.01
+fp16: true
+class_weighted: true
+early_stopping_patience: 2
+seed: 42
+extra_train:
+  - data/processed/translated.csv
+  - data/processed/romanised.csv
+  - data/processed/synthetic.csv

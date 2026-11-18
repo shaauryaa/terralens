@@ -1,0 +1,52 @@
+{
+  "experiment_id": "translation_set",
+  "script": "scripts/build_translation_set.py",
+  "config": {
+    "per_lang": 3000,
+    "min_tokens": 6,
+    "max_tokens": 60
+  },
+  "seed": 42,
+  "timestamp": "2026-11-18T09:04:20+00:00",
+  "kaggle_mojibake": {
+    "rows": 38488,
+    "rows_with_mojibake_before": 6203,
+    "rows_with_mojibake_after": 19,
+    "rows_changed_by_ftfy": 8333
+  },
+  "pool_before_filter": {
+    "Favour": 20157,
+    "Against": 4043,
+    "None": 7589
+  },
+  "pool_usable": {
+    "Favour": 19790,
+    "Against": 3918,
+    "None": 7097
+  },
+  "gwsd_usable": {
+    "Favour": 757,
+    "Against": 378,
+    "None": 858
+  },
+  "selected": {
+    "hi": {
+      "Favour": 895,
+      "Against": 2138,
+      "None": 962
+    },
+    "bn": {
+      "Favour": 902,
+      "Against": 2158,
+      "None": 936
+    }
+  },
+  "selected_by_source": {
+    "kaggle_climate_sentiment": 5673,
+    "gwsd": 1993,
+    "climatestance_reddit": 173,
+    "semeval_climate": 78,
+    "climatestance_gold": 74
+  },
+  "total": 7991
+}

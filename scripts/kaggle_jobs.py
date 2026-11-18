@@ -154,7 +154,7 @@ def cmd_dataset(args, env) -> None:
     shutil.rmtree(folder, ignore_errors=True)
     folder.mkdir(parents=True)
     for f in collect() + [ROOT / e for e in args.extra]:
-        name = f.name if "challenge" not in f.parts else f"challenge_{f.name}"
+        name = f.name if ("challenge" not in f.parts or f.name.startswith("challenge")) else f"challenge_{f.name}"
         shutil.copy(f, folder / name)
     meta = {"title": "terralens-data", "id": f"{env['KAGGLE_USERNAME']}/{DATASET_SLUG}",
             "licenses": [{"name": "other"}]}

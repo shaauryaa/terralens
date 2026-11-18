@@ -4,3 +4,6 @@
 
 peft>=0.10              # LoRA / QLoRA adapters
 bitsandbytes>=0.43      # 4-bit / 8-bit quantisation (CUDA only)
+
+# IndicTrans2 translation (scripts/translate.py); needs a C compiler, and the model's remote code needs
+# transformers < 4.50: pip install "transformers==4.46.3" IndicTransToolkit sentencepiece

@@ -1,0 +1,10 @@
+# E1: Gemma 3 12B instruct (ungated 4-bit mirror of google/gemma-3-12b-it), 5-shot prompting in 4-bit (few-shot examples from train only).
+exp_id: e1_gemma3_12b_5shot
+model_name: unsloth/gemma-3-12b-it-bnb-4bit
+shots: 5
+shot_quota: {Favour: 2, Against: 2, None: 1}
+load_in_4bit: true
+compute_dtype: float32
+batch_size: 4
+max_new_tokens: 8
+seed: 42

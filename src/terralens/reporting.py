@@ -17,7 +17,7 @@ from terralens.splits import parse_tags
 ROOT = Path(__file__).resolve().parents[2]
 RESULTS_DIR = ROOT / "results"
 PRED_DIR = ROOT / "results" / "predictions"
-TAGS = ("sarcasm", "negation", "implicit", "code_mixed", "romanised", "question")
+TAGS = ("sarcasm", "negation", "implicit", "code_mixed", "romanised", "question", "topic_not_target")
 
 
 def now() -> str:
