@@ -54,7 +54,10 @@ DIR = ROOT / "data" / "interim" / "synthetic"
 SYN_CSV = ROOT / "data" / "processed" / "synthetic.csv"
 CHALLENGE_CSV = ROOT / "data" / "challenge" / "challenge.csv"
 RESULTS_JSON = ROOT / "results" / "synthetic_data.json"
-GEN_MODELS = ["gemini-3.5-flash", "gemini-3.5-flash-lite"]
+# gemini-3.5-flash was tried first but returned HTTP 503 (high demand) on most requests on 2026-11-18, so
+# generation uses flash-lite only.
+GEN_MODELS = ["gemini-3.5-flash-lite"]
+COUNTER = DIR / "gemini_requests.json"  # every Gemini call made by this script (budget < 150 overall)
 PER_REQUEST = 40
 SEED = 42
 
@@ -146,7 +149,16 @@ figures. Do not repeat sentence templates.
 Output ONLY JSON: {{"comments": [{{"text": "...", "label": "Favour|Against|None"}}, ...]}}"""
 
 
+def count_request(n: int = 1) -> int:
+    c = json.loads(COUNTER.read_text()) if COUNTER.exists() else {"requests": 0}
+    c["requests"] += n
+    COUNTER.parent.mkdir(parents=True, exist_ok=True)
+    COUNTER.write_text(json.dumps(c))
+    return c["requests"]
+
+
 def call(model: str, key: str, prompt: str, temperature: float = 1.0) -> str:
+    count_request()
     url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent"
     body = {"contents": [{"role": "user", "parts": [{"text": prompt}]}],
             "generationConfig": {"temperature": temperature, "responseMimeType": "application/json",
@@ -233,7 +245,8 @@ def cmd_label(args, key: str) -> None:
         return
     stats = label_items(items, ANNOTATORS["gemini"], DIR / f"labels_gemini_{args.set}.jsonl", args.set,
                         args.max_requests, key)
-    print(stats)
+    total = count_request(stats["requests"])
+    print(stats, f"total Gemini requests so far: {total}")
 
 
 def labels(path: Path) -> pd.Series:

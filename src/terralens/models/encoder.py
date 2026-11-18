@@ -81,9 +81,23 @@ def class_weights(labels) -> np.ndarray:
     return counts.sum() / (len(LABELS) * counts)
 
 
+PROMPT_TEMPLATE = ("Claim: {claim}\n"
+                   "Comment: {text}\n"
+                   "Stance of the comment toward the claim (Favour, Against or None):")
+
+
 class PairDataset:
-    def __init__(self, tokenizer, claim: str, texts, labels, max_length: int):
-        self.enc = tokenizer([claim] * len(texts), list(texts), truncation="only_second", max_length=max_length)
+    """(claim, comment) sentence pairs for encoders; ``prompt=True`` gives one prompt string (decoder models)."""
+
+    def __init__(self, tokenizer, claim: str, texts, labels, max_length: int, prompt: bool = False):
+        if prompt:
+            ids = [tokenizer(t, truncation=True, max_length=max_length - 40, add_special_tokens=False)["input_ids"]
+                   for t in texts]
+            short = [tokenizer.decode(i) for i in ids]
+            self.enc = tokenizer([PROMPT_TEMPLATE.format(claim=claim, text=t) for t in short], truncation=True,
+                                 max_length=max_length)
+        else:
+            self.enc = tokenizer([claim] * len(texts), list(texts), truncation="only_second", max_length=max_length)
         self.labels = [LABEL2ID[y] for y in labels]
 
     def __len__(self):
@@ -109,6 +123,40 @@ def predict_logits(model, loader, device, fp16: bool) -> np.ndarray:
     return np.concatenate(out) if out else np.zeros((0, len(LABELS)))
 
 
+def load_qlora_model(cfg: dict, tok, device):
+    """4-bit base model with a LoRA sequence-classification head (QLoRA, PEFT). CUDA only for 4-bit."""
+    import torch
+    from peft import LoraConfig, get_peft_model, prepare_model_for_kbit_training
+    from transformers import AutoModelForSequenceClassification, BitsAndBytesConfig
+
+    q = cfg["qlora"]
+    if tok.pad_token is None:
+        tok.pad_token = tok.eos_token
+    tok.padding_side = "right"
+    kwargs = {"num_labels": len(LABELS), "id2label": dict(enumerate(LABELS)), "label2id": LABEL2ID}
+    if device.type == "cuda":
+        kwargs.update(quantization_config=BitsAndBytesConfig(load_in_4bit=True, bnb_4bit_quant_type="nf4",
+                                                             bnb_4bit_compute_dtype=torch.float16,
+                                                             bnb_4bit_use_double_quant=True),
+                      device_map={"": 0}, dtype=torch.float16)
+    model = AutoModelForSequenceClassification.from_pretrained(cfg["model_name"], **kwargs)
+    model.config.pad_token_id = tok.pad_token_id
+    if device.type == "cuda":
+        model = prepare_model_for_kbit_training(model, use_gradient_checkpointing=q.get("gradient_checkpointing", True))
+    lora = LoraConfig(task_type="SEQ_CLS", r=q.get("r", 16), lora_alpha=q.get("alpha", 32),
+                      lora_dropout=q.get("dropout", 0.05),
+                      target_modules=q.get("target_modules", ["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj",
+                                                              "up_proj", "down_proj"]))
+    model = get_peft_model(model, lora)
+    for n, p in model.named_parameters():  # the classification head is trained in fp32
+        if "score" in n and p.requires_grad:
+            p.data = p.data.float()
+    if device.type != "cuda":
+        model.to(device)
+    model.print_trainable_parameters()
+    return model
+
+
 def train_and_evaluate(cfg: dict, limit: int | None = None, results_dir: Path | None = None,
                        pred_dir: Path | None = None) -> dict:
     import torch
@@ -125,14 +173,19 @@ def train_and_evaluate(cfg: dict, limit: int | None = None, results_dir: Path | 
           f"train={len(train)} val={len(val)} test={len(test)}", flush=True)
 
     tok = AutoTokenizer.from_pretrained(cfg["model_name"])
-    model = AutoModelForSequenceClassification.from_pretrained(
-        cfg["model_name"], num_labels=len(LABELS), id2label=dict(enumerate(LABELS)), label2id=LABEL2ID,
-        ignore_mismatched_sizes=True)
-    model.to(device)
+    qlora = cfg.get("qlora")
+    if qlora:
+        model = load_qlora_model(cfg, tok, device)
+    else:
+        model = AutoModelForSequenceClassification.from_pretrained(
+            cfg["model_name"], num_labels=len(LABELS), id2label=dict(enumerate(LABELS)), label2id=LABEL2ID,
+            ignore_mismatched_sizes=True)
+        model.to(device)
     collate = DataCollatorWithPadding(tok)
     g = torch.Generator()
     g.manual_seed(cfg["seed"])
-    mk = lambda df: PairDataset(tok, cfg["claim"], df["text"].tolist(), df["label"].tolist(), cfg["max_length"])  # noqa: E731
+    mk = lambda df: PairDataset(tok, cfg["claim"], df["text"].tolist(), df["label"].tolist(), cfg["max_length"],  # noqa: E731
+                                prompt=bool(qlora))
     train_loader = DataLoader(mk(train), batch_size=cfg["batch_size"], shuffle=True, collate_fn=collate, generator=g)
     val_loader = DataLoader(mk(val), batch_size=cfg["eval_batch_size"], collate_fn=collate)
     test_loader = DataLoader(mk(test), batch_size=cfg["eval_batch_size"], collate_fn=collate)
@@ -140,10 +193,10 @@ def train_and_evaluate(cfg: dict, limit: int | None = None, results_dir: Path | 
     weights = class_weights(train["label"]) if cfg["class_weighted"] else np.ones(len(LABELS))
     loss_fn = torch.nn.CrossEntropyLoss(weight=torch.tensor(weights, dtype=torch.float32, device=device))
     no_decay = ("bias", "LayerNorm.weight", "layer_norm.weight", "norm.weight")
+    trainable = [(n, p) for n, p in model.named_parameters() if p.requires_grad]
     params = [
-        {"params": [p for n, p in model.named_parameters() if not any(nd in n for nd in no_decay)],
-         "weight_decay": cfg["weight_decay"]},
-        {"params": [p for n, p in model.named_parameters() if any(nd in n for nd in no_decay)], "weight_decay": 0.0},
+        {"params": [p for n, p in trainable if not any(nd in n for nd in no_decay)], "weight_decay": cfg["weight_decay"]},
+        {"params": [p for n, p in trainable if any(nd in n for nd in no_decay)], "weight_decay": 0.0},
     ]
     opt = torch.optim.AdamW(params, lr=float(cfg["lr"]))
     steps_per_epoch = math.ceil(len(train_loader) / cfg["grad_accum"])
@@ -152,6 +205,7 @@ def train_and_evaluate(cfg: dict, limit: int | None = None, results_dir: Path | 
     scaler = torch.amp.GradScaler("cuda", enabled=fp16)
 
     history, best, best_state, bad_epochs = [], -1.0, None, 0
+    budget = cfg.get("time_budget_minutes")
     for epoch in range(1, cfg["epochs"] + 1):
         model.train()
         t0 = time.time()
@@ -166,13 +220,28 @@ def train_and_evaluate(cfg: dict, limit: int | None = None, results_dir: Path | 
             scaler.scale(loss).backward()
             if step % cfg["grad_accum"] == 0 or step == len(train_loader):
                 scaler.unscale_(opt)
-                torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
+                torch.nn.utils.clip_grad_norm_([p for _, p in trainable], 1.0)
                 scaler.step(opt)
                 scaler.update()
                 sched.step()
                 opt.zero_grad()
             running += loss.item() * cfg["grad_accum"]
             n_batches += 1
+            if budget and epoch == 1 and step == 20:
+                per_step = (time.time() - t0) / 20
+                projected = per_step * len(train_loader) * cfg["epochs"] / 60
+                fit = int(budget * 60 // (per_step * len(train_loader) * 1.15))  # 15% for evaluation
+                print(f"  projected training time {projected:.0f} min for {cfg['epochs']} epochs "
+                      f"(budget {budget} min)", flush=True)
+                if fit < 1:
+                    write_result(cfg["exp_id"] + cfg.get("exp_suffix", ""), {
+                        "kind": "skipped", "config": {k: v for k, v in cfg.items() if k != "exp_id"},
+                        "seed": cfg["seed"], "reason": f"projected {projected:.0f} min > budget {budget} min"},
+                        Path(results_dir) if results_dir else ROOT / "results")
+                    raise SystemExit(f"skipped: one epoch alone would exceed the {budget} min budget")
+                if fit < cfg["epochs"]:
+                    print(f"  reducing epochs {cfg['epochs']} -> {fit} to fit the budget", flush=True)
+                    cfg["epochs"] = fit
         train_time = time.time() - t0
         val_logits = predict_logits(model, val_loader, device, fp16)
         val_pred = predict_labels(val_logits)
@@ -186,14 +255,16 @@ def train_and_evaluate(cfg: dict, limit: int | None = None, results_dir: Path | 
               f"time={train_time:.0f}s", flush=True)
         if vf > best + 1e-9:
             best, bad_epochs = vf, 0
-            best_state = {k: v.detach().to("cpu", copy=True) for k, v in model.state_dict().items()}
+            keep = {n for n, _ in trainable} if qlora else None
+            best_state = {k: v.detach().to("cpu", copy=True) for k, v in model.state_dict().items()
+                          if keep is None or k in keep}  # QLoRA: only the trained LoRA / head weights
             best_epoch = epoch
         else:
             bad_epochs += 1
             if bad_epochs >= cfg["early_stopping_patience"]:
                 print(f"  early stop after epoch {epoch}", flush=True)
                 break
-    model.load_state_dict(best_state)
+    model.load_state_dict(best_state, strict=not qlora)
 
     val_logits = predict_logits(model, val_loader, device, fp16)
     test_logits = predict_logits(model, test_loader, device, fp16)
@@ -204,7 +275,7 @@ def train_and_evaluate(cfg: dict, limit: int | None = None, results_dir: Path | 
     exp_id = (cfg["exp_id"] + (f"_s{seed}" if seed != 42 else "") + cfg.get("exp_suffix", "")
               + (f"_dryrun{limit}" if limit else ""))
     payload = {
-        "kind": "encoder",
+        "kind": "qlora" if qlora else "encoder",
         "config": {k: v for k, v in cfg.items() if k != "exp_id"},
         "seed": seed,
         "dry_run_limit": limit,

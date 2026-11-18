@@ -33,3 +33,8 @@ def test_best_by_val_ignores_seed_runs_and_seed_table():
     assert mrt.best_by_val(res, "e2_") == "e2_b"
     rows = mrt.seed_rows(res)
     assert len(rows) == 1 and rows[0][0] == "e2_b" and rows[0][2].startswith("0.733 ±")
+
+
+def test_skipped_run_is_shown_as_skipped():
+    rows = {r[1]: r for r in mrt.main_rows({"e4_qlora": {"kind": "skipped", "reason": "projected 300 min"}})}
+    assert rows["e4_qlora"][3].startswith("skipped")

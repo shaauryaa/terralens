@@ -84,6 +84,9 @@ def main_rows(res: dict) -> list[list[str]]:
         if r is None:
             rows.append([tag, exp_id, desc, "pending"] + [""] * 6)
             continue
+        if r.get("kind") == "skipped":
+            rows.append([tag, exp_id, desc, f"skipped ({r.get('reason', '')})"] + [""] * 6)
+            continue
         v, t = r["val"], r["test"]
         tuned = (r.get("thresholds") or {}).get("test_tuned")
         fails = ""

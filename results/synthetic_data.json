@@ -1,0 +1,64 @@
+{
+  "experiment_id": "synthetic_data",
+  "script": "scripts/synth_hard_cases.py",
+  "seed": 42,
+  "timestamp": "2026-11-18T09:28:45+00:00",
+  "config": {
+    "generator": [
+      "gemini-3.5-flash-lite"
+    ],
+    "labellers": [
+      "Claude (Claude Code session)",
+      "gemini-3.5-flash-lite"
+    ],
+    "rule": "keep only if Claude and Gemini agree; agreed label used"
+  },
+  "synthetic": {
+    "generated": 600,
+    "labelled_by_both": 600,
+    "agree": 470,
+    "agreement_pct": 78.3,
+    "agree_with_intended": 422,
+    "label": {
+      "Favour": 106,
+      "Against": 177,
+      "None": 187
+    },
+    "by_phenomenon": {
+      "negation": 135,
+      "implicit": 100,
+      "sarcasm": 91,
+      "code_mixed": 74,
+      "romanised": 70
+    },
+    "by_lang": {
+      "hi": 254,
+      "bn": 216
+    },
+    "cohen_kappa_claude_gemini": 0.6728,
+    "dropped_same_text_as_challenge": 0
+  },
+  "challenge": {
+    "generated": 300,
+    "labelled_by_both": 300,
+    "agree": 217,
+    "agreement_pct": 72.3,
+    "agree_with_intended": 201,
+    "label": {
+      "Favour": 58,
+      "Against": 55,
+      "None": 104
+    },
+    "by_phenomenon": {
+      "negation": 70,
+      "implicit": 60,
+      "topic_not_target": 49,
+      "sarcasm": 38
+    },
+    "by_lang": {
+      "hi": 116,
+      "bn": 101
+    },
+    "cohen_kappa_claude_gemini": 0.5834
+  }
+}

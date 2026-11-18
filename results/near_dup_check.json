@@ -1,0 +1,29 @@
+{
+  "experiment_id": "near_dup_check",
+  "script": "scripts/near_dup_check.py",
+  "seed": null,
+  "timestamp": "2026-11-18T09:28:57+00:00",
+  "config": {
+    "threshold": 0.9,
+    "ngram_range": [
+      3,
+      5
+    ],
+    "analyzer": "char_wb tf-idf"
+  },
+  "held_out": {
+    "val": 522,
+    "test": 538,
+    "test_noisy": 538,
+    "challenge": 217
+  },
+  "files": {
+    "translated.csv": "not built",
+    "romanised.csv": "not built",
+    "synthetic.csv": {
+      "rows": 470,
+      "dropped": 0,
+      "dropped_by_set": {}
+    }
+  }
+}

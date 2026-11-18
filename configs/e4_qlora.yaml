@@ -1,0 +1,22 @@
+# E4: QLoRA (PEFT) on Qwen3-4B as a 3-way sequence classifier (4-bit base, LoRA r=16), seed 42.
+exp_id: e4_qlora
+model_name: Qwen/Qwen3-4B
+max_length: 160
+lr: 2.0e-4
+batch_size: 8
+grad_accum: 4
+eval_batch_size: 32
+epochs: 2
+warmup_ratio: 0.1
+weight_decay: 0.0
+fp16: true
+class_weighted: true
+early_stopping_patience: 1
+seed: 42
+qlora:
+  r: 16
+  alpha: 32
+  dropout: 0.05
+  gradient_checkpointing: true
+extra_train: []
+time_budget_minutes: 110
