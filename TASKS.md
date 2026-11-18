@@ -113,8 +113,10 @@ Then: run `search`, open the CSV, set `keep=1` on ~50 to 70 relevant videos (Cla
 ## T9. Training-data expansion  [Colab]  (~1 to 2 h)
 
 > Write `scripts/translate.py` (IndicTrans2 en→hi and en→bn, batched on GPU) for a class-balanced subset of
-> the external data (over-sample Against), `scripts/transliterate.py` (romanise part of it with IndicXlit or a
-> rule-based fallback), and `scripts/synth_hard_cases.py` (Gemini generates negation, sarcasm, implicit and
+> the external data (over-sample Against). Before translating, repair the mojibake in
+> `kaggle_climate_sentiment.csv` (6,109 rows, e.g. `â€¦` for "…") with `ftfy.fix_text` (add `ftfy` to
+> requirements), report how many rows changed, and add a test. Then write `scripts/transliterate.py`
+> (romanise part of it with IndicXlit or a rule-based fallback), and `scripts/synth_hard_cases.py` (Gemini generates negation, sarcasm, implicit and
 > code-mixed comments per label using the guideline; save with source=synthetic). Run the near-duplicate
 > check against val/test. Add configs `e3_best_plus_b.yaml`, `e3_best_plus_bc.yaml`, `e3_best_plus_bcd.yaml`.
 > Summarise, then commit and push after my approval.

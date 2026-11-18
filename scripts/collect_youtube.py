@@ -69,15 +69,8 @@ from terralens.preprocess import (  # noqa: E402
 
 # Romanised Hindi / Bengali marker words for the rule-based language check (whole words, any case).
 # A Latin-script comment counts as romanised Hindi/Bengali only if it contains at least one of them.
-# Extend these lists freely; "ki" and "nai" are in both on purpose.
-ROMANISED_KEYWORDS = {
-    "hi": ["hai", "hain", "nahi", "nahin", "kya", "bhai", "ki", "ka", "ke", "aur", "mein", "ho", "tha",
-           "raha", "sab", "yeh", "ye", "kuch",
-           "bhaiya", "bahut", "achha", "accha", "nai"],
-    "bn": ["ami", "tumi", "ache", "achhe", "na", "kore", "hobe", "eta", "dada", "khub", "amra", "ki", "keno",
-           "holo", "bhalo",
-           "valo", "vaiya", "nai", "hoy", "theke", "ar"],
-}
+# The lists live in terralens.language (shared with scripts/merge_and_dedup.py) and were extended in T3.
+from terralens.language import ROMANISED_KEYWORDS  # noqa: E402
 
 DEFAULT_CONFIG = ROOT / "configs" / "youtube_search.yaml"
 CANDIDATES_CSV = ROOT / "data" / "interim" / "candidate_videos.csv"

@@ -1,0 +1,107 @@
+{
+  "experiment_id": "comment_cleaning",
+  "script": "scripts/merge_and_dedup.py",
+  "config": {
+    "min_tokens": 3,
+    "near_dup_threshold": 0.9,
+    "ngram_range": [
+      3,
+      5
+    ],
+    "analyzer": "char_wb, tf-idf (sublinear), cosine",
+    "sample_size": 5000,
+    "per_video_cap": 100
+  },
+  "seed": 42,
+  "timestamp": "2026-11-18T01:58:37+00:00",
+  "raw_comments": 6224,
+  "raw_videos": 64,
+  "steps": [
+    {
+      "step": "empty",
+      "removed": 10,
+      "removed_by_video_lang": {
+        "bn": 7,
+        "hi": 3
+      },
+      "remaining": 6214
+    },
+    {
+      "step": "emoji_only",
+      "removed": 354,
+      "removed_by_video_lang": {
+        "hi": 205,
+        "bn": 149
+      },
+      "remaining": 5860
+    },
+    {
+      "step": "english",
+      "removed": 1264,
+      "removed_by_video_lang": {
+        "hi": 861,
+        "bn": 403
+      },
+      "remaining": 4596
+    },
+    {
+      "step": "other_language",
+      "removed": 493,
+      "removed_by_video_lang": {
+        "hi": 314,
+        "bn": 179
+      },
+      "remaining": 4103
+    },
+    {
+      "step": "too_short",
+      "removed": 236,
+      "removed_by_video_lang": {
+        "bn": 143,
+        "hi": 93
+      },
+      "remaining": 3867
+    },
+    {
+      "step": "exact_dup",
+      "removed": 60,
+      "removed_by_video_lang": {
+        "hi": 47,
+        "bn": 13
+      },
+      "remaining": 3807
+    },
+    {
+      "step": "near_dup",
+      "removed": 9,
+      "removed_by_video_lang": {
+        "hi": 7,
+        "bn": 2
+      },
+      "remaining": 3798
+    }
+  ],
+  "near_dup_cross_video": 3,
+  "kept": 3798,
+  "kept_videos": 64,
+  "kept_by_lang": {
+    "bn": 1425,
+    "hi": 2373
+  },
+  "kept_by_script": {
+    "bengali": 1112,
+    "devanagari": 904,
+    "latin": 1672,
+    "mixed": 110
+  },
+  "kept_by_lang_script": {
+    "bn|bengali": 1112,
+    "bn|latin": 276,
+    "bn|mixed": 37,
+    "hi|devanagari": 904,
+    "hi|latin": 1396,
+    "hi|mixed": 73
+  },
+  "kept_from_sceptic_videos": 339,
+  "sample": null
+}

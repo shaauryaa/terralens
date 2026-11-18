@@ -17,6 +17,49 @@ The only source used for validation and test. Collected with `scripts/collect_yo
 
 No author names or channel IDs are stored; @handles become `@user` and e-mail addresses `<email>`.
 
+### Cleaning, language filter and deduplication (T3)
+
+`scripts/merge_and_dedup.py` turns the 6,224 fetched comments (64 videos) into
+`data/interim/comments_clean.csv`. Counts are from `results/comment_cleaning.json`.
+
+**Text processing**
+- Text is cleaned with `terralens.preprocess.clean_text`; emojis are kept as `:name:` tokens.
+- Language, script, token count and duplicate detection use the same text with emojis removed.
+- Language (`terralens.language.detect_language`) is decided as follows:
+  - Devanagari text is Hindi; Bengali script is Bengali.
+  - Latin-script text is romanised Hindi or Bengali if it contains marker words from `ROMANISED_KEYWORDS`.
+  - Forms of address (ji, bhai, dada, didi, ...) count as markers only when the comment has no English
+    function words, so "Thanks Acharya ji" stays English.
+  - A Hindi/Bengali tie is resolved by the video's language.
+  - Other Latin-script text is English if it contains common English words, else "other".
+- Each comment is removed by the first step that applies. Every removed row, with its reason (and, for
+  duplicates, the id it duplicates and the similarity), is kept in `data/interim/comments_removed.csv`.
+
+| Step | Removed | Remaining |
+|---|---:|---:|
+| empty: only links / @mentions | 10 | 6,214 |
+| emoji_only: no letters | 354 | 5,860 |
+| english | 1,264 | 4,596 |
+| other_language | 493 | 4,103 |
+| too_short: fewer than 3 word tokens | 236 | 3,867 |
+| exact_dup: same normalised text, any video | 60 | 3,807 |
+| near_dup: char 3-5-gram TF-IDF cosine > 0.9; 3 of the 9 across videos | 9 | 3,798 |
+
+**What is kept:** 3,798 comments from all 64 videos, 339 of them from the 4 sceptic videos.
+
+| Language | Native script | Latin (romanised) | Mixed scripts | Total |
+|---|---:|---:|---:|---:|
+| Hindi | 904 | 1,396 | 73 | 2,373 |
+| Bengali | 1,112 | 276 | 37 | 1,425 |
+
+Fewer than 5,000 comments remain, so no labelling sample was drawn (`comments_to_label.csv` is written only
+above 5,000); all of `comments_clean.csv` goes to labelling.
+
+**Limitation (romanised text).** The keyword rule cannot know every romanised spelling. 183 of the 493
+"other_language" comments have 3 or more tokens. A manual look suggests many of them are romanised Hindi or
+Bengali with unlisted spellings (e.g. "Modi chor he", "2 bochor por abar dekhlam"). These comments are in
+`comments_removed.csv` and can be recovered later, for example by an LLM language check.
+
 ## External English data (training only)
 
 Built by `scripts/download_external.py` into `data/external/` (git-ignored). Counts below come from
@@ -197,4 +240,6 @@ provenance columns appear after a re-run with `--overwrite`.
   bhaiya, bahut, achha, accha, nai, hoy, theke, ar). With the new list, 7 more candidates would pass the 20%
   pre-filter and 2 videos dropped for low Hindi/Bengali share would pass the rule. They were not re-screened;
   the 64 kept videos were left unchanged, and the `rule_indic_share` values in
-  `data/interim/candidate_videos.csv` come from the earlier list.
+  `data/interim/candidate_videos.csv` come from the earlier list. In T3 the list moved to
+  `src/terralens/language.py` and was extended further (shared by both scripts); the screening was not
+  re-run with it.
