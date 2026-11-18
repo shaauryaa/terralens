@@ -68,3 +68,6 @@ results/predictions/
 data/challenge/*
 !data/challenge/.gitkeep
 configs/_e4_qlora_resolved.yaml
+
+# local run log (not part of the project)
+reports/OVERNIGHT_LOG.md

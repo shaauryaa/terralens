@@ -104,7 +104,7 @@ def cmd_sample(args) -> None:
                 f.write(json.dumps(v, ensure_ascii=False) + "\n")
         print(f"  glosses {len(valid)} ok, {len(errors)} missing")
         time.sleep(5)
-    # bump the shared Gemini request counter used for the overnight budget
+    # bump the shared Gemini request counter that tracks the request budget
     counter = ROOT / "data" / "interim" / "synthetic" / "gemini_requests.json"
     if counter.exists():
         c = json.loads(counter.read_text())
