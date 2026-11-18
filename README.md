@@ -2,6 +2,9 @@
 
 **Stance detection on Hindi and Bengali YouTube comments about climate change.**
 
+**Live demo:** [DEMO.md](DEMO.md) runs the dataset summary, a tiny CPU training run, the results table and the
+tests on a laptop CPU in about half a minute (`scripts/demo.ps1` on Windows, `scripts/demo.sh` elsewhere).
+
 TerraLens is a course project for **CSET 346 (Natural Language Processing), Bennett University**. Given a
 YouTube comment in Hindi or Bengali (native script, romanised, or code-mixed with English), the task is to
 classify its stance toward the claim **"Climate change and global warming is a serious concern."** as
@@ -206,6 +209,7 @@ implicit stance (0.684), and E4 scores 0.825, weakest on implicit stance (0.704)
 ## Reproduce
 
 Python 3.10+. CPU steps run on a laptop; GPU steps need one T4 (Kaggle or Colab).
+For a quick check without data or a GPU, run the [live demo](DEMO.md) first.
 
 ```bash
 python -m venv .venv && source .venv/bin/activate     # Windows: .venv\Scripts\activate

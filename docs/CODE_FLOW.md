@@ -71,6 +71,7 @@ repo root. `data/raw/`, `data/interim/`, `data/external/`, `data/processed/`, `d
 | 6.5 | `scripts/plot_results.py` | `results/*.json` | Test Macro F1 with 95% CI per system; marks the best system on val | `reports/figures/results_macro_f1.png` |
 | 6.6 | `scripts/make_report_figures.py` | `results/*.json` (cleaning, agreement, dataset stats, E4, robustness) | Draws the progress-report figures with one class palette (pipeline, class mix, script mix, results, E4 confusion matrix, robustness) | `reports/figures/report_*.png` |
 | 6.7 | `scripts/build_report.py` | `reports/progress_report.md`, report figures | Lays out the report as an A4 PDF with reportlab and scales it until pypdf counts exactly 2 pages; `--preview` renders PNGs | `reports/progress_report.pdf` |
+| 6.8 | `scripts/demo.py` (via `scripts/demo.ps1` / `scripts/demo.sh`) | `results/dataset_stats.json`, local Source A data, cached tiny model, `results/*.json` | Live CPU demo: dataset counts, a 64-row training dry run, rebuilt results table and figure, pytest (see DEMO.md) | terminal output; `reports/results.md` and `reports/figures/results_macro_f1.png` rebuilt unchanged |
 
 ## Library modules (`src/terralens/`)
 
