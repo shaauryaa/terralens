@@ -1,7 +1,7 @@
 {
   "experiment_id": "dataset_stats",
   "script": "scripts/dataset_stats.py",
-  "timestamp": "2026-11-18T08:46:37+00:00",
+  "timestamp": "2026-11-18T21:42:24+00:00",
   "source_a_rows": 3825,
   "videos": 64,
   "source_counts": {
@@ -11,9 +11,9 @@
     "English external: gwsd": 2050,
     "English external: kaggle_climate_sentiment": 38488,
     "English external: semeval_climate": 564,
-    "B: translated (hi/bn)": 0,
-    "C: romanised": 0,
-    "D: synthetic": 0
+    "B: translated (hi/bn)": 7991,
+    "C: romanised": 3053,
+    "D: synthetic": 470
   },
   "class_overall": {
     "Favour": 814,
