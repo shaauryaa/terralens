@@ -1,0 +1,146 @@
+{
+  "experiment_id": "splits",
+  "script": "scripts/make_splits.py",
+  "config": {
+    "method": "StratifiedGroupKFold",
+    "n_folds": 20,
+    "test_folds": [
+      7,
+      13,
+      17
+    ],
+    "val_folds": [
+      2,
+      8,
+      10
+    ],
+    "fold_assignment": "numpy default_rng(seed).permutation(20): first 3 test, next 3 val",
+    "stratify": "label x lang",
+    "group": "video_id",
+    "min_against_val_test": 12,
+    "seeds_allowed": [
+      42,
+      61
+    ]
+  },
+  "seed": 43,
+  "seeds_tried": [
+    {
+      "seed": 42,
+      "ok": false,
+      "train": {
+        "n": 2678,
+        "against": 77
+      },
+      "val": {
+        "n": 552,
+        "against": 12
+      },
+      "test": {
+        "n": 595,
+        "against": 11
+      }
+    },
+    {
+      "seed": 43,
+      "ok": true,
+      "train": {
+        "n": 2765,
+        "against": 60
+      },
+      "val": {
+        "n": 522,
+        "against": 19
+      },
+      "test": {
+        "n": 538,
+        "against": 21
+      }
+    }
+  ],
+  "timestamp": "2026-11-18T08:46:06+00:00",
+  "source_rows": 3825,
+  "splits": {
+    "train": {
+      "n": 2765,
+      "videos": 43,
+      "label": {
+        "Favour": 584,
+        "Against": 60,
+        "None": 2121
+      },
+      "by_lang": {
+        "hi": {
+          "Favour": 438,
+          "Against": 37,
+          "None": 1218
+        },
+        "bn": {
+          "Favour": 146,
+          "Against": 23,
+          "None": 903
+        }
+      },
+      "script": {
+        "latin": 1242,
+        "bengali": 832,
+        "devanagari": 614,
+        "mixed": 77
+      }
+    },
+    "val": {
+      "n": 522,
+      "videos": 11,
+      "label": {
+        "Favour": 74,
+        "Against": 19,
+        "None": 429
+      },
+      "by_lang": {
+        "hi": {
+          "Favour": 72,
+          "Against": 12,
+          "None": 273
+        },
+        "bn": {
+          "Favour": 2,
+          "Against": 7,
+          "None": 156
+        }
+      },
+      "script": {
+        "latin": 226,
+        "devanagari": 150,
+        "bengali": 130,
+        "mixed": 16
+      }
+    },
+    "test": {
+      "n": 538,
+      "videos": 10,
+      "label": {
+        "Favour": 156,
+        "Against": 21,
+        "None": 361
+      },
+      "by_lang": {
+        "hi": {
+          "Favour": 127,
+          "Against": 17,
+          "None": 183
+        },
+        "bn": {
+          "Favour": 29,
+          "Against": 4,
+          "None": 178
+        }
+      },
+      "script": {
+        "latin": 242,
+        "bengali": 144,
+        "devanagari": 136,
+        "mixed": 16
+      }
+    }
+  }
+}

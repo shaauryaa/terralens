@@ -1,0 +1,402 @@
+{
+  "experiment_id": "dataset_stats",
+  "script": "scripts/dataset_stats.py",
+  "timestamp": "2026-11-18T08:46:37+00:00",
+  "source_a_rows": 3825,
+  "videos": 64,
+  "source_counts": {
+    "A: YouTube comments (labelled)": 3825,
+    "English external: climatestance_gold": 303,
+    "English external: climatestance_reddit_pseudo": 6208,
+    "English external: gwsd": 2050,
+    "English external: kaggle_climate_sentiment": 38488,
+    "English external: semeval_climate": 564,
+    "B: translated (hi/bn)": 0,
+    "C: romanised": 0,
+    "D: synthetic": 0
+  },
+  "class_overall": {
+    "Favour": 814,
+    "Against": 100,
+    "None": 2911
+  },
+  "class_by_lang": {
+    "bn": {
+      "Favour": 177,
+      "Against": 34,
+      "None": 1237
+    },
+    "hi": {
+      "Favour": 637,
+      "Against": 66,
+      "None": 1674
+    }
+  },
+  "class_by_split": {
+    "test": {
+      "Favour": 156,
+      "Against": 21,
+      "None": 361
+    },
+    "train": {
+      "Favour": 584,
+      "Against": 60,
+      "None": 2121
+    },
+    "val": {
+      "Favour": 74,
+      "Against": 19,
+      "None": 429
+    }
+  },
+  "class_by_split_lang": {
+    "test/bn": {
+      "Favour": 29,
+      "Against": 4,
+      "None": 178
+    },
+    "test/hi": {
+      "Favour": 127,
+      "Against": 17,
+      "None": 183
+    },
+    "train/bn": {
+      "Favour": 146,
+      "Against": 23,
+      "None": 903
+    },
+    "train/hi": {
+      "Favour": 438,
+      "Against": 37,
+      "None": 1218
+    },
+    "val/bn": {
+      "Favour": 2,
+      "Against": 7,
+      "None": 156
+    },
+    "val/hi": {
+      "Favour": 72,
+      "Against": 12,
+      "None": 273
+    }
+  },
+  "script_by_lang": {
+    "bn": {
+      "bengali": 1106,
+      "devanagari": 0,
+      "latin": 306,
+      "mixed": 36
+    },
+    "hi": {
+      "bengali": 0,
+      "devanagari": 900,
+      "latin": 1404,
+      "mixed": 73
+    }
+  },
+  "videos_by_split": {
+    "test": 10,
+    "train": 43,
+    "val": 11
+  },
+  "top_words": {
+    "Favour": [
+      [
+        "গাছ",
+        65
+      ],
+      [
+        "आचार्य",
+        61
+      ],
+      [
+        "जी",
+        58
+      ],
+      [
+        "जलवायु",
+        57
+      ],
+      [
+        "परिवर्तन",
+        56
+      ],
+      [
+        "climate",
+        51
+      ],
+      [
+        "सबसे",
+        49
+      ],
+      [
+        "पेड़",
+        49
+      ],
+      [
+        "change",
+        48
+      ],
+      [
+        "कम",
+        47
+      ],
+      [
+        "बात",
+        46
+      ],
+      [
+        "ज्यादा",
+        45
+      ],
+      [
+        "नही",
+        42
+      ],
+      [
+        "प्रकृति",
+        41
+      ],
+      [
+        "इंसान",
+        41
+      ]
+    ],
+    "Against": [
+      [
+        "change",
+        12
+      ],
+      [
+        "এটা",
+        11
+      ],
+      [
+        "বরফ",
+        11
+      ],
+      [
+        "বেশি",
+        10
+      ],
+      [
+        "global",
+        9
+      ],
+      [
+        "মানুষ",
+        8
+      ],
+      [
+        "warming",
+        8
+      ],
+      [
+        "co",
+        8
+      ],
+      [
+        "পৃথিবীর",
+        7
+      ],
+      [
+        "ne",
+        7
+      ],
+      [
+        "মিথ্যা",
+        7
+      ],
+      [
+        "সেটা",
+        7
+      ],
+      [
+        "কথা",
+        7
+      ],
+      [
+        "climate",
+        7
+      ],
+      [
+        "আগে",
+        6
+      ]
+    ],
+    "None": [
+      [
+        "আল্লাহ",
+        150
+      ],
+      [
+        "ভিডিও",
+        137
+      ],
+      [
+        "sir",
+        133
+      ],
+      [
+        "আমাদের",
+        122
+      ],
+      [
+        "आचार्य",
+        121
+      ],
+      [
+        "जी",
+        115
+      ],
+      [
+        "nhi",
+        114
+      ],
+      [
+        "ji",
+        106
+      ],
+      [
+        "আপনার",
+        103
+      ],
+      [
+        "অনেক",
+        99
+      ],
+      [
+        "video",
+        92
+      ],
+      [
+        "ভালো",
+        90
+      ],
+      [
+        "ধন্যবাদ",
+        82
+      ],
+      [
+        "করুন",
+        80
+      ],
+      [
+        "india",
+        77
+      ]
+    ]
+  },
+  "cleaning_steps": [
+    {
+      "step": "empty",
+      "removed": 10
+    },
+    {
+      "step": "emoji_only",
+      "removed": 354
+    },
+    {
+      "step": "english",
+      "removed": 1264
+    },
+    {
+      "step": "other_language",
+      "removed": 493
+    },
+    {
+      "step": "too_short",
+      "removed": 236
+    },
+    {
+      "step": "exact_dup",
+      "removed": 60
+    },
+    {
+      "step": "near_dup",
+      "removed": 9
+    }
+  ],
+  "agreement": {
+    "cohen_kappa_claude_gemini": {
+      "n": 3856,
+      "cohen_kappa": 0.7173,
+      "pct_agreement": 88.72
+    },
+    "by_lang": {
+      "bn": {
+        "n": 1456,
+        "cohen_kappa": 0.735,
+        "pct_agreement": 92.72
+      },
+      "hi": {
+        "n": 2400,
+        "cohen_kappa": 0.6994,
+        "pct_agreement": 86.29
+      }
+    },
+    "by_script": {
+      "bengali": {
+        "n": 1112,
+        "cohen_kappa": 0.7381,
+        "pct_agreement": 92.54
+      },
+      "devanagari": {
+        "n": 904,
+        "cohen_kappa": 0.7123,
+        "pct_agreement": 84.96
+      },
+      "latin": {
+        "n": 1730,
+        "cohen_kappa": 0.6699,
+        "pct_agreement": 88.21
+      },
+      "mixed": {
+        "n": 110,
+        "cohen_kappa": 0.7559,
+        "pct_agreement": 89.09
+      }
+    },
+    "adjudication": {
+      "disagreements": 435,
+      "sent_to_gptoss": 435,
+      "resolved_by_gptoss": 404,
+      "three_way_splits": 31,
+      "pending": 0
+    },
+    "fleiss_kappa_sample": {
+      "n": 294,
+      "kappa": 0.784
+    }
+  },
+  "script_mix": {
+    "Bengali": {
+      "bengali": 1106,
+      "devanagari": 0,
+      "latin": 306,
+      "mixed": 36
+    },
+    "Hindi": {
+      "bengali": 0,
+      "devanagari": 900,
+      "latin": 1404,
+      "mixed": 73
+    }
+  },
+  "length_tokens": {
+    "bn": {
+      "mean": 14.7,
+      "median": 9.0,
+      "p95": 41.0,
+      "max": 474
+    },
+    "hi": {
+      "mean": 20.6,
+      "median": 14.0,
+      "p95": 57.0,
+      "max": 730
+    },
+    "share_over_128_tokens": 0.0065
+  }
+}

@@ -141,6 +141,28 @@ sceptic videos.
 Bengali with unlisted spellings (e.g. "Modi chor he", "2 bochor por abar dekhlam"). These comments are in
 `comments_removed.csv` and can be recovered later, for example by an LLM language check.
 
+### Final file and splits (T6)
+
+`scripts/make_source_a.py` writes `data/processed/source_a.csv` (id, text, label, lang, script, source =
+`youtube`, video_id, tags): 3,825 comments from 64 videos (814 Favour, 100 Against, 2,911 None). The 31
+3-way splits are dropped (ids in `data/interim/dropped_splits.csv`). `tags` is the union of the tags from the
+annotators whose label equals the final label.
+
+`scripts/make_splits.py` splits by video (StratifiedGroupKFold, 20 folds, stratified on label x language; 3
+folds test, 3 val, 14 train). The seed also draws which folds go to test and val, because with 64 videos
+sklearn's shuffle barely changes the folds. Seeds 42-61 were tried in order and the first where val and test
+each have at least 12 Against and both languages was used: **seed 43** (`results/splits.json`).
+
+| Split | Videos | Favour | Against | None | Total |
+|---|---:|---:|---:|---:|---:|
+| train | 43 | 584 | 60 | 2,121 | 2,765 |
+| val | 11 | 74 | 19 | 429 | 522 |
+| test | 10 | 156 | 21 | 361 | 538 |
+
+Val has only 2 Bengali Favour comments and test only 4 Bengali Against, so per-language scores for Bengali on
+val and test are noisy. Full statistics and figures: `reports/dataset_stats.md` (from
+`scripts/dataset_stats.py`, numbers in `results/dataset_stats.json`).
+
 ## External English data (training only)
 
 Built by `scripts/download_external.py` into `data/external/` (git-ignored). Counts below come from
