@@ -104,7 +104,7 @@ def table(header: list[str], rows: list[list[str]]) -> str:
 
 
 def best_by_val(res: dict, prefix: str) -> str | None:
-    cands = {k: r for k, r in res.items() if k.startswith(prefix) and r.get("kind") == "encoder"
+    cands = {k: r for k, r in res.items() if k.startswith(prefix) and r.get("kind") == "encoder" and "val" in r
              and not k.endswith(("_s43", "_s44", "_robust"))}
     return max(cands, key=lambda k: cands[k]["val"]["macro_f1"]) if cands else None
 
@@ -130,7 +130,7 @@ def lang_rows(res: dict) -> list[list[str]]:
     rows = []
     for exp_id, _, _ in PLANNED:
         r = res.get(exp_id)
-        if not r:
+        if not r or "test" not in r:
             continue
         t = r["test"]
         bl, bs = t.get("by_lang", {}), t.get("by_script", {})

@@ -1,0 +1,427 @@
+{
+  "experiment_id": "robustness_e3_best_plus_bcd",
+  "timestamp": "2026-11-18T10:54:34+00:00",
+  "kind": "robustness",
+  "config": {
+    "inputs": [
+      "results/e3_best_plus_bcd_robust.json",
+      "results/e3_best_plus_bcd_s43.json",
+      "results/e3_best_plus_bcd_s44.json"
+    ]
+  },
+  "seed": null,
+  "plain": {
+    "variant": "plain",
+    "runs": [
+      {
+        "experiment_id": "e3_best_plus_bcd_robust",
+        "seed": 42,
+        "test_macro_f1": 0.5613,
+        "test_against_f1": 0.1429,
+        "test_by_tag": {
+          "sarcasm": 0.4738,
+          "implicit": 0.2206,
+          "code_mixed": 0.5322,
+          "romanised": 0.5254,
+          "question": 0.5474
+        },
+        "noisy_macro_f1": 0.5513,
+        "noisy_against_f1": 0.0833,
+        "drop_macro_f1": 0.01,
+        "drop_against_f1": 0.0596,
+        "challenge_n": 217,
+        "challenge_macro_f1": 0.7408,
+        "challenge_against_f1": 0.6522,
+        "challenge_by_phenomenon": {
+          "sarcasm": {
+            "n": 38,
+            "macro_f1": 0.7876,
+            "accuracy": 0.8684
+          },
+          "negation": {
+            "n": 70,
+            "macro_f1": 0.7013,
+            "accuracy": 0.7429
+          },
+          "implicit": {
+            "n": 60,
+            "macro_f1": 0.7059,
+            "accuracy": 0.75
+          },
+          "topic_not_target": {
+            "n": 49,
+            "macro_f1": 0.783,
+            "accuracy": 0.7959
+          }
+        },
+        "challenge_by_lang": {
+          "bn": 0.6616,
+          "hi": 0.7988
+        }
+      },
+      {
+        "experiment_id": "e3_best_plus_bcd_s43",
+        "seed": 43,
+        "test_macro_f1": 0.608,
+        "test_against_f1": 0.2424,
+        "test_by_tag": {
+          "sarcasm": 0.4792,
+          "implicit": 0.3297,
+          "code_mixed": 0.6523,
+          "romanised": 0.5857,
+          "question": 0.5474
+        },
+        "noisy_macro_f1": 0.6038,
+        "noisy_against_f1": 0.2564,
+        "drop_macro_f1": 0.0042,
+        "drop_against_f1": -0.014,
+        "challenge_n": 217,
+        "challenge_macro_f1": 0.8048,
+        "challenge_against_f1": 0.7706,
+        "challenge_by_phenomenon": {
+          "sarcasm": {
+            "n": 38,
+            "macro_f1": 0.6909,
+            "accuracy": 0.8421
+          },
+          "negation": {
+            "n": 70,
+            "macro_f1": 0.7624,
+            "accuracy": 0.8
+          },
+          "implicit": {
+            "n": 60,
+            "macro_f1": 0.749,
+            "accuracy": 0.7833
+          },
+          "topic_not_target": {
+            "n": 49,
+            "macro_f1": 0.9386,
+            "accuracy": 0.9388
+          }
+        },
+        "challenge_by_lang": {
+          "bn": 0.655,
+          "hi": 0.9082
+        }
+      },
+      {
+        "experiment_id": "e3_best_plus_bcd_s44",
+        "seed": 44,
+        "test_macro_f1": 0.5925,
+        "test_against_f1": 0.2222,
+        "test_by_tag": {
+          "sarcasm": 0.3739,
+          "implicit": 0.2126,
+          "code_mixed": 0.5071,
+          "romanised": 0.538,
+          "question": 0.4833
+        },
+        "noisy_macro_f1": 0.5923,
+        "noisy_against_f1": 0.2308,
+        "drop_macro_f1": 0.0002,
+        "drop_against_f1": -0.0086,
+        "challenge_n": 217,
+        "challenge_macro_f1": 0.726,
+        "challenge_against_f1": 0.6939,
+        "challenge_by_phenomenon": {
+          "sarcasm": {
+            "n": 38,
+            "macro_f1": 0.5317,
+            "accuracy": 0.7895
+          },
+          "negation": {
+            "n": 70,
+            "macro_f1": 0.7108,
+            "accuracy": 0.7286
+          },
+          "implicit": {
+            "n": 60,
+            "macro_f1": 0.5959,
+            "accuracy": 0.65
+          },
+          "topic_not_target": {
+            "n": 49,
+            "macro_f1": 0.8982,
+            "accuracy": 0.898
+          }
+        },
+        "challenge_by_lang": {
+          "bn": 0.5272,
+          "hi": 0.8693
+        }
+      }
+    ],
+    "mean_std": {
+      "test_macro_f1": {
+        "mean": 0.5873,
+        "std": 0.0238,
+        "n_runs": 3
+      },
+      "test_against_f1": {
+        "mean": 0.2025,
+        "std": 0.0526,
+        "n_runs": 3
+      },
+      "noisy_macro_f1": {
+        "mean": 0.5825,
+        "std": 0.0276,
+        "n_runs": 3
+      },
+      "noisy_against_f1": {
+        "mean": 0.1902,
+        "std": 0.0934,
+        "n_runs": 3
+      },
+      "drop_macro_f1": {
+        "mean": 0.0048,
+        "std": 0.0049,
+        "n_runs": 3
+      },
+      "drop_against_f1": {
+        "mean": 0.0123,
+        "std": 0.041,
+        "n_runs": 3
+      },
+      "challenge_macro_f1": {
+        "mean": 0.7572,
+        "std": 0.0419,
+        "n_runs": 3
+      },
+      "challenge_against_f1": {
+        "mean": 0.7056,
+        "std": 0.0601,
+        "n_runs": 3
+      },
+      "challenge_by_phenomenon": {
+        "implicit": {
+          "mean": 0.6836,
+          "std": 0.0789,
+          "n_runs": 3
+        },
+        "negation": {
+          "mean": 0.7248,
+          "std": 0.0329,
+          "n_runs": 3
+        },
+        "sarcasm": {
+          "mean": 0.6701,
+          "std": 0.1292,
+          "n_runs": 3
+        },
+        "topic_not_target": {
+          "mean": 0.8733,
+          "std": 0.0807,
+          "n_runs": 3
+        }
+      }
+    }
+  },
+  "tuned_offsets": {
+    "variant": "tuned",
+    "runs": [
+      {
+        "experiment_id": "e3_best_plus_bcd_robust",
+        "seed": 42,
+        "test_macro_f1": 0.5181,
+        "test_against_f1": 0.0833,
+        "test_by_tag": {
+          "sarcasm": 0.3492,
+          "implicit": 0.1785,
+          "code_mixed": 0.4818,
+          "romanised": 0.4619,
+          "question": 0.5474
+        },
+        "noisy_macro_f1": 0.5171,
+        "noisy_against_f1": 0.0909,
+        "drop_macro_f1": 0.001,
+        "drop_against_f1": -0.0076,
+        "challenge_n": 217,
+        "challenge_macro_f1": 0.7275,
+        "challenge_against_f1": 0.6742,
+        "challenge_by_phenomenon": {
+          "sarcasm": {
+            "n": 38,
+            "macro_f1": 0.7433,
+            "accuracy": 0.8421
+          },
+          "negation": {
+            "n": 70,
+            "macro_f1": 0.6524,
+            "accuracy": 0.7
+          },
+          "implicit": {
+            "n": 60,
+            "macro_f1": 0.73,
+            "accuracy": 0.7667
+          },
+          "topic_not_target": {
+            "n": 49,
+            "macro_f1": 0.7808,
+            "accuracy": 0.7959
+          }
+        },
+        "challenge_by_lang": {
+          "bn": 0.6933,
+          "hi": 0.7469
+        }
+      },
+      {
+        "experiment_id": "e3_best_plus_bcd_s43",
+        "seed": 43,
+        "test_macro_f1": 0.6176,
+        "test_against_f1": 0.2667,
+        "test_by_tag": {
+          "sarcasm": 0.498,
+          "implicit": 0.3297,
+          "code_mixed": 0.6523,
+          "romanised": 0.5975,
+          "question": 0.5474
+        },
+        "noisy_macro_f1": 0.6229,
+        "noisy_against_f1": 0.303,
+        "drop_macro_f1": -0.0053,
+        "drop_against_f1": -0.0363,
+        "challenge_n": 217,
+        "challenge_macro_f1": 0.8026,
+        "challenge_against_f1": 0.7573,
+        "challenge_by_phenomenon": {
+          "sarcasm": {
+            "n": 38,
+            "macro_f1": 0.6909,
+            "accuracy": 0.8421
+          },
+          "negation": {
+            "n": 70,
+            "macro_f1": 0.7815,
+            "accuracy": 0.8143
+          },
+          "implicit": {
+            "n": 60,
+            "macro_f1": 0.7311,
+            "accuracy": 0.7667
+          },
+          "topic_not_target": {
+            "n": 49,
+            "macro_f1": 0.9173,
+            "accuracy": 0.9184
+          }
+        },
+        "challenge_by_lang": {
+          "bn": 0.6647,
+          "hi": 0.899
+        }
+      },
+      {
+        "experiment_id": "e3_best_plus_bcd_s44",
+        "seed": 44,
+        "test_macro_f1": 0.5464,
+        "test_against_f1": 0.0833,
+        "test_by_tag": {
+          "sarcasm": 0.3739,
+          "implicit": 0.2141,
+          "code_mixed": 0.5071,
+          "romanised": 0.5394,
+          "question": 0.4833
+        },
+        "noisy_macro_f1": 0.5125,
+        "noisy_against_f1": 0.0,
+        "drop_macro_f1": 0.0339,
+        "drop_against_f1": 0.0833,
+        "challenge_n": 217,
+        "challenge_macro_f1": 0.6844,
+        "challenge_against_f1": 0.6024,
+        "challenge_by_phenomenon": {
+          "sarcasm": {
+            "n": 38,
+            "macro_f1": 0.5389,
+            "accuracy": 0.7632
+          },
+          "negation": {
+            "n": 70,
+            "macro_f1": 0.679,
+            "accuracy": 0.7
+          },
+          "implicit": {
+            "n": 60,
+            "macro_f1": 0.5556,
+            "accuracy": 0.6333
+          },
+          "topic_not_target": {
+            "n": 49,
+            "macro_f1": 0.8312,
+            "accuracy": 0.8367
+          }
+        },
+        "challenge_by_lang": {
+          "bn": 0.4866,
+          "hi": 0.819
+        }
+      }
+    ],
+    "mean_std": {
+      "test_macro_f1": {
+        "mean": 0.5607,
+        "std": 0.0513,
+        "n_runs": 3
+      },
+      "test_against_f1": {
+        "mean": 0.1444,
+        "std": 0.1059,
+        "n_runs": 3
+      },
+      "noisy_macro_f1": {
+        "mean": 0.5508,
+        "std": 0.0625,
+        "n_runs": 3
+      },
+      "noisy_against_f1": {
+        "mean": 0.1313,
+        "std": 0.1555,
+        "n_runs": 3
+      },
+      "drop_macro_f1": {
+        "mean": 0.0099,
+        "std": 0.0211,
+        "n_runs": 3
+      },
+      "drop_against_f1": {
+        "mean": 0.0131,
+        "std": 0.0624,
+        "n_runs": 3
+      },
+      "challenge_macro_f1": {
+        "mean": 0.7382,
+        "std": 0.0598,
+        "n_runs": 3
+      },
+      "challenge_against_f1": {
+        "mean": 0.678,
+        "std": 0.0775,
+        "n_runs": 3
+      },
+      "challenge_by_phenomenon": {
+        "implicit": {
+          "mean": 0.6722,
+          "std": 0.101,
+          "n_runs": 3
+        },
+        "negation": {
+          "mean": 0.7043,
+          "std": 0.0682,
+          "n_runs": 3
+        },
+        "sarcasm": {
+          "mean": 0.6577,
+          "std": 0.1062,
+          "n_runs": 3
+        },
+        "topic_not_target": {
+          "mean": 0.8431,
+          "std": 0.069,
+          "n_runs": 3
+        }
+      }
+    }
+  }
+}

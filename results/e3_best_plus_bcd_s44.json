@@ -1,0 +1,1118 @@
+{
+  "experiment_id": "e3_best_plus_bcd_s44",
+  "timestamp": "2026-11-18T10:49:05+00:00",
+  "kind": "encoder",
+  "config": {
+    "claim": "Climate change and global warming is a serious concern.",
+    "max_length": 128,
+    "lr": 2e-05,
+    "batch_size": 32,
+    "grad_accum": 1,
+    "epochs": 4,
+    "warmup_ratio": 0.1,
+    "weight_decay": 0.01,
+    "fp16": true,
+    "class_weighted": true,
+    "early_stopping_patience": 2,
+    "seed": 44,
+    "extra_train": [
+      "data/processed/translated.csv",
+      "data/processed/romanised.csv",
+      "data/processed/synthetic.csv"
+    ],
+    "eval_batch_size": 64,
+    "n_boot": 1000,
+    "extra_eval": {
+      "challenge": "data/challenge/challenge.csv",
+      "test_noisy": "data/processed/test_noisy.csv"
+    },
+    "exp_suffix": "",
+    "model_name": "jhu-clsp/mmBERT-base"
+  },
+  "seed": 44,
+  "dry_run_limit": null,
+  "environment": {
+    "python": "3.13.16",
+    "platform": "Linux-6.18.55+-x86_64-with-glibc2.39",
+    "torch": "2.11.0+cu130",
+    "cuda": "Tesla T4",
+    "transformers": "5.20.2"
+  },
+  "data": {
+    "train": 14279,
+    "val": 522,
+    "test": 538,
+    "train_by_source": {
+      "translated": 7991,
+      "romanised": 3053,
+      "youtube": 2765,
+      "synthetic": 470
+    },
+    "train_label": {
+      "Favour": 3182,
+      "Against": 5800,
+      "None": 5297
+    },
+    "class_weights": [
+      1.4958,
+      0.8206,
+      0.8986
+    ]
+  },
+  "history": [
+    {
+      "epoch": 1,
+      "train_loss": 0.8907,
+      "val_macro_f1": 0.6194,
+      "val_against_f1": 0.3226,
+      "epoch_seconds": 189.1,
+      "eval_seconds": 2.0
+    },
+    {
+      "epoch": 2,
+      "train_loss": 0.5356,
+      "val_macro_f1": 0.6188,
+      "val_against_f1": 0.3256,
+      "epoch_seconds": 188.1,
+      "eval_seconds": 2.0
+    },
+    {
+      "epoch": 3,
+      "train_loss": 0.1975,
+      "val_macro_f1": 0.6243,
+      "val_against_f1": 0.2941,
+      "epoch_seconds": 187.2,
+      "eval_seconds": 2.0
+    },
+    {
+      "epoch": 4,
+      "train_loss": 0.0369,
+      "val_macro_f1": 0.6219,
+      "val_against_f1": 0.3182,
+      "epoch_seconds": 184.5,
+      "eval_seconds": 2.0
+    }
+  ],
+  "best_epoch": 3,
+  "seconds_per_epoch_mean": 187.2,
+  "selection": "best epoch by val Macro F1; offsets tuned on val Macro F1",
+  "val": {
+    "n": 522,
+    "macro_f1": 0.6243,
+    "against_f1": 0.2941,
+    "accuracy": 0.864,
+    "per_class": {
+      "Favour": {
+        "precision": 0.6667,
+        "recall": 0.6486,
+        "f1": 0.6575,
+        "support": 74
+      },
+      "Against": {
+        "precision": 0.3333,
+        "recall": 0.2632,
+        "f1": 0.2941,
+        "support": 19
+      },
+      "None": {
+        "precision": 0.9149,
+        "recall": 0.9277,
+        "f1": 0.9213,
+        "support": 429
+      }
+    },
+    "confusion_matrix": {
+      "rows_gold_cols_pred": [
+        "Favour",
+        "Against",
+        "None"
+      ],
+      "matrix": [
+        [
+          48,
+          2,
+          24
+        ],
+        [
+          1,
+          5,
+          13
+        ],
+        [
+          23,
+          8,
+          398
+        ]
+      ]
+    },
+    "ci95": {
+      "macro_f1": [
+        0.5455,
+        0.696
+      ],
+      "against_f1": [
+        0.08,
+        0.4865
+      ],
+      "n_resamples": 1000,
+      "seed": 44
+    },
+    "by_lang": {
+      "bn": {
+        "n": 165,
+        "macro_f1": 0.4687,
+        "against_f1": 0.2222
+      },
+      "hi": {
+        "n": 357,
+        "macro_f1": 0.6349,
+        "against_f1": 0.32
+      }
+    },
+    "by_script": {
+      "bengali": {
+        "n": 130,
+        "macro_f1": 0.4757,
+        "against_f1": 0.2222
+      },
+      "devanagari": {
+        "n": 150,
+        "macro_f1": 0.6545,
+        "against_f1": 0.375
+      },
+      "latin": {
+        "n": 226,
+        "macro_f1": 0.5731,
+        "against_f1": 0.2222
+      },
+      "mixed": {
+        "n": 16,
+        "macro_f1": 0.5877,
+        "against_f1": 0.0
+      }
+    },
+    "by_tag": {
+      "sarcasm": {
+        "n": 19,
+        "macro_f1": 0.2381,
+        "against_f1": 0.0,
+        "accuracy": 0.5263
+      },
+      "implicit": {
+        "n": 44,
+        "macro_f1": 0.2657,
+        "against_f1": 0.0,
+        "accuracy": 0.5455
+      },
+      "code_mixed": {
+        "n": 63,
+        "macro_f1": 0.7635,
+        "against_f1": 0.6667,
+        "accuracy": 0.8413
+      },
+      "romanised": {
+        "n": 269,
+        "macro_f1": 0.6234,
+        "against_f1": 0.2857,
+        "accuracy": 0.8773
+      },
+      "question": {
+        "n": 28,
+        "macro_f1": 0.5493,
+        "against_f1": 0.0,
+        "accuracy": 0.9643
+      }
+    }
+  },
+  "test": {
+    "n": 538,
+    "macro_f1": 0.5925,
+    "against_f1": 0.2222,
+    "accuracy": 0.8123,
+    "per_class": {
+      "Favour": {
+        "precision": 0.8182,
+        "recall": 0.5769,
+        "f1": 0.6767,
+        "support": 156
+      },
+      "Against": {
+        "precision": 0.5,
+        "recall": 0.1429,
+        "f1": 0.2222,
+        "support": 21
+      },
+      "None": {
+        "precision": 0.8152,
+        "recall": 0.9529,
+        "f1": 0.8787,
+        "support": 361
+      }
+    },
+    "confusion_matrix": {
+      "rows_gold_cols_pred": [
+        "Favour",
+        "Against",
+        "None"
+      ],
+      "matrix": [
+        [
+          90,
+          2,
+          64
+        ],
+        [
+          4,
+          3,
+          14
+        ],
+        [
+          16,
+          1,
+          344
+        ]
+      ]
+    },
+    "ci95": {
+      "macro_f1": [
+        0.5176,
+        0.6746
+      ],
+      "against_f1": [
+        0.0,
+        0.4444
+      ],
+      "n_resamples": 1000,
+      "seed": 44
+    },
+    "by_lang": {
+      "bn": {
+        "n": 211,
+        "macro_f1": 0.756,
+        "against_f1": 0.6667
+      },
+      "hi": {
+        "n": 327,
+        "macro_f1": 0.5315,
+        "against_f1": 0.0952
+      }
+    },
+    "by_script": {
+      "bengali": {
+        "n": 144,
+        "macro_f1": 0.7584,
+        "against_f1": 0.6667
+      },
+      "devanagari": {
+        "n": 136,
+        "macro_f1": 0.495,
+        "against_f1": 0.0
+      },
+      "latin": {
+        "n": 242,
+        "macro_f1": 0.5429,
+        "against_f1": 0.1538
+      },
+      "mixed": {
+        "n": 16,
+        "macro_f1": 0.4762,
+        "against_f1": 0.0
+      }
+    },
+    "by_tag": {
+      "sarcasm": {
+        "n": 30,
+        "macro_f1": 0.3739,
+        "against_f1": 0.1538,
+        "accuracy": 0.5333
+      },
+      "implicit": {
+        "n": 96,
+        "macro_f1": 0.2126,
+        "against_f1": 0.0,
+        "accuracy": 0.4583
+      },
+      "code_mixed": {
+        "n": 75,
+        "macro_f1": 0.5071,
+        "against_f1": 0.0,
+        "accuracy": 0.7867
+      },
+      "romanised": {
+        "n": 269,
+        "macro_f1": 0.538,
+        "against_f1": 0.1333,
+        "accuracy": 0.8104
+      },
+      "question": {
+        "n": 22,
+        "macro_f1": 0.4833,
+        "against_f1": 0.0,
+        "accuracy": 0.9091
+      }
+    }
+  },
+  "thresholds": {
+    "offsets": {
+      "Favour": 0.0,
+      "Against": -2.2,
+      "None": 0.1
+    },
+    "val_macro_f1_tuned": 0.6671,
+    "note": "offsets added to logits, tuned on val only; val_tuned is optimistic (tuned on itself)",
+    "val_tuned": {
+      "n": 522,
+      "macro_f1": 0.6671,
+      "against_f1": 0.4,
+      "accuracy": 0.8812,
+      "per_class": {
+        "Favour": {
+          "precision": 0.6806,
+          "recall": 0.6622,
+          "f1": 0.6712,
+          "support": 74
+        },
+        "Against": {
+          "precision": 0.8333,
+          "recall": 0.2632,
+          "f1": 0.4,
+          "support": 19
+        },
+        "None": {
+          "precision": 0.9144,
+          "recall": 0.9464,
+          "f1": 0.9301,
+          "support": 429
+        }
+      },
+      "confusion_matrix": {
+        "rows_gold_cols_pred": [
+          "Favour",
+          "Against",
+          "None"
+        ],
+        "matrix": [
+          [
+            49,
+            0,
+            25
+          ],
+          [
+            1,
+            5,
+            13
+          ],
+          [
+            22,
+            1,
+            406
+          ]
+        ]
+      },
+      "ci95": {
+        "macro_f1": [
+          0.5703,
+          0.7461
+        ],
+        "against_f1": [
+          0.1248,
+          0.6154
+        ],
+        "n_resamples": 1000,
+        "seed": 44
+      },
+      "by_lang": {
+        "bn": {
+          "n": 165,
+          "macro_f1": 0.479,
+          "against_f1": 0.2222
+        },
+        "hi": {
+          "n": 357,
+          "macro_f1": 0.7021,
+          "against_f1": 0.5
+        }
+      },
+      "by_script": {
+        "bengali": {
+          "n": 130,
+          "macro_f1": 0.489,
+          "against_f1": 0.2222
+        },
+        "devanagari": {
+          "n": 150,
+          "macro_f1": 0.7645,
+          "against_f1": 0.6667
+        },
+        "latin": {
+          "n": 226,
+          "macro_f1": 0.5961,
+          "against_f1": 0.2857
+        },
+        "mixed": {
+          "n": 16,
+          "macro_f1": 0.5877,
+          "against_f1": 0.0
+        }
+      },
+      "by_tag": {
+        "sarcasm": {
+          "n": 19,
+          "macro_f1": 0.2381,
+          "against_f1": 0.0,
+          "accuracy": 0.5263
+        },
+        "implicit": {
+          "n": 44,
+          "macro_f1": 0.2706,
+          "against_f1": 0.0,
+          "accuracy": 0.5682
+        },
+        "code_mixed": {
+          "n": 63,
+          "macro_f1": 0.8204,
+          "against_f1": 0.8,
+          "accuracy": 0.8571
+        },
+        "romanised": {
+          "n": 269,
+          "macro_f1": 0.6606,
+          "against_f1": 0.4,
+          "accuracy": 0.8885
+        },
+        "question": {
+          "n": 28,
+          "macro_f1": 0.5493,
+          "against_f1": 0.0,
+          "accuracy": 0.9643
+        }
+      }
+    },
+    "test_tuned": {
+      "n": 538,
+      "macro_f1": 0.5464,
+      "against_f1": 0.0833,
+      "accuracy": 0.8104,
+      "per_class": {
+        "Favour": {
+          "precision": 0.8257,
+          "recall": 0.5769,
+          "f1": 0.6792,
+          "support": 156
+        },
+        "Against": {
+          "precision": 0.3333,
+          "recall": 0.0476,
+          "f1": 0.0833,
+          "support": 21
+        },
+        "None": {
+          "precision": 0.8099,
+          "recall": 0.9557,
+          "f1": 0.8767,
+          "support": 361
+        }
+      },
+      "confusion_matrix": {
+        "rows_gold_cols_pred": [
+          "Favour",
+          "Against",
+          "None"
+        ],
+        "matrix": [
+          [
+            90,
+            2,
+            64
+          ],
+          [
+            3,
+            1,
+            17
+          ],
+          [
+            16,
+            0,
+            345
+          ]
+        ]
+      },
+      "ci95": {
+        "macro_f1": [
+          0.4958,
+          0.6098
+        ],
+        "against_f1": [
+          0.0,
+          0.2581
+        ],
+        "n_resamples": 1000,
+        "seed": 44
+      },
+      "by_lang": {
+        "bn": {
+          "n": 211,
+          "macro_f1": 0.5321,
+          "against_f1": 0.0
+        },
+        "hi": {
+          "n": 327,
+          "macro_f1": 0.5345,
+          "against_f1": 0.1
+        }
+      },
+      "by_script": {
+        "bengali": {
+          "n": 144,
+          "macro_f1": 0.5336,
+          "against_f1": 0.0
+        },
+        "devanagari": {
+          "n": 136,
+          "macro_f1": 0.4981,
+          "against_f1": 0.0
+        },
+        "latin": {
+          "n": 242,
+          "macro_f1": 0.5445,
+          "against_f1": 0.1538
+        },
+        "mixed": {
+          "n": 16,
+          "macro_f1": 0.4762,
+          "against_f1": 0.0
+        }
+      },
+      "by_tag": {
+        "sarcasm": {
+          "n": 30,
+          "macro_f1": 0.3739,
+          "against_f1": 0.1538,
+          "accuracy": 0.5333
+        },
+        "implicit": {
+          "n": 96,
+          "macro_f1": 0.2141,
+          "against_f1": 0.0,
+          "accuracy": 0.4583
+        },
+        "code_mixed": {
+          "n": 75,
+          "macro_f1": 0.5071,
+          "against_f1": 0.0,
+          "accuracy": 0.7867
+        },
+        "romanised": {
+          "n": 269,
+          "macro_f1": 0.5394,
+          "against_f1": 0.1333,
+          "accuracy": 0.8104
+        },
+        "question": {
+          "n": 22,
+          "macro_f1": 0.4833,
+          "against_f1": 0.0,
+          "accuracy": 0.9091
+        }
+      }
+    }
+  },
+  "extra_eval": {
+    "challenge": {
+      "source": "data/challenge/challenge.csv",
+      "plain": {
+        "n": 217,
+        "macro_f1": 0.726,
+        "against_f1": 0.6939,
+        "accuracy": 0.7558,
+        "per_class": {
+          "Favour": {
+            "precision": 0.6792,
+            "recall": 0.6207,
+            "f1": 0.6486,
+            "support": 58
+          },
+          "Against": {
+            "precision": 0.7907,
+            "recall": 0.6182,
+            "f1": 0.6939,
+            "support": 55
+          },
+          "None": {
+            "precision": 0.7769,
+            "recall": 0.9038,
+            "f1": 0.8356,
+            "support": 104
+          }
+        },
+        "confusion_matrix": {
+          "rows_gold_cols_pred": [
+            "Favour",
+            "Against",
+            "None"
+          ],
+          "matrix": [
+            [
+              36,
+              8,
+              14
+            ],
+            [
+              8,
+              34,
+              13
+            ],
+            [
+              9,
+              1,
+              94
+            ]
+          ]
+        },
+        "ci95": {
+          "macro_f1": [
+            0.6584,
+            0.7844
+          ],
+          "against_f1": [
+            0.5806,
+            0.7851
+          ],
+          "n_resamples": 1000,
+          "seed": 44
+        },
+        "by_lang": {
+          "bn": {
+            "n": 101,
+            "macro_f1": 0.5272,
+            "against_f1": 0.4615
+          },
+          "hi": {
+            "n": 116,
+            "macro_f1": 0.8693,
+            "against_f1": 0.8475
+          }
+        },
+        "by_script": {
+          "bengali": {
+            "n": 37,
+            "macro_f1": 0.7297,
+            "against_f1": 0.7778
+          },
+          "devanagari": {
+            "n": 36,
+            "macro_f1": 0.9423,
+            "against_f1": 0.9524
+          },
+          "latin": {
+            "n": 144,
+            "macro_f1": 0.657,
+            "against_f1": 0.5763
+          }
+        },
+        "by_tag": {
+          "sarcasm": {
+            "n": 38,
+            "macro_f1": 0.5317,
+            "against_f1": 0.6667,
+            "accuracy": 0.7895
+          },
+          "negation": {
+            "n": 70,
+            "macro_f1": 0.7108,
+            "against_f1": 0.7097,
+            "accuracy": 0.7286
+          },
+          "implicit": {
+            "n": 60,
+            "macro_f1": 0.5959,
+            "against_f1": 0.4615,
+            "accuracy": 0.65
+          },
+          "topic_not_target": {
+            "n": 49,
+            "macro_f1": 0.8982,
+            "against_f1": 0.8966,
+            "accuracy": 0.898
+          }
+        }
+      },
+      "tuned": {
+        "n": 217,
+        "macro_f1": 0.6844,
+        "against_f1": 0.6024,
+        "accuracy": 0.7235,
+        "per_class": {
+          "Favour": {
+            "precision": 0.6607,
+            "recall": 0.6379,
+            "f1": 0.6491,
+            "support": 58
+          },
+          "Against": {
+            "precision": 0.8929,
+            "recall": 0.4545,
+            "f1": 0.6024,
+            "support": 55
+          },
+          "None": {
+            "precision": 0.7143,
+            "recall": 0.9135,
+            "f1": 0.8017,
+            "support": 104
+          }
+        },
+        "confusion_matrix": {
+          "rows_gold_cols_pred": [
+            "Favour",
+            "Against",
+            "None"
+          ],
+          "matrix": [
+            [
+              37,
+              2,
+              19
+            ],
+            [
+              11,
+              25,
+              19
+            ],
+            [
+              8,
+              1,
+              95
+            ]
+          ]
+        },
+        "ci95": {
+          "macro_f1": [
+            0.6135,
+            0.7496
+          ],
+          "against_f1": [
+            0.4557,
+            0.7126
+          ],
+          "n_resamples": 1000,
+          "seed": 44
+        },
+        "by_lang": {
+          "bn": {
+            "n": 101,
+            "macro_f1": 0.4866,
+            "against_f1": 0.3226
+          },
+          "hi": {
+            "n": 116,
+            "macro_f1": 0.819,
+            "against_f1": 0.7692
+          }
+        },
+        "by_script": {
+          "bengali": {
+            "n": 37,
+            "macro_f1": 0.6825,
+            "against_f1": 0.7143
+          },
+          "devanagari": {
+            "n": 36,
+            "macro_f1": 0.8872,
+            "against_f1": 0.8889
+          },
+          "latin": {
+            "n": 144,
+            "macro_f1": 0.6195,
+            "against_f1": 0.4706
+          }
+        },
+        "by_tag": {
+          "sarcasm": {
+            "n": 38,
+            "macro_f1": 0.5389,
+            "against_f1": 0.75,
+            "accuracy": 0.7632
+          },
+          "negation": {
+            "n": 70,
+            "macro_f1": 0.679,
+            "against_f1": 0.64,
+            "accuracy": 0.7
+          },
+          "implicit": {
+            "n": 60,
+            "macro_f1": 0.5556,
+            "against_f1": 0.3333,
+            "accuracy": 0.6333
+          },
+          "topic_not_target": {
+            "n": 49,
+            "macro_f1": 0.8312,
+            "against_f1": 0.7692,
+            "accuracy": 0.8367
+          }
+        }
+      }
+    },
+    "test_noisy": {
+      "source": "data/processed/test_noisy.csv",
+      "plain": {
+        "n": 538,
+        "macro_f1": 0.5923,
+        "against_f1": 0.2308,
+        "accuracy": 0.8048,
+        "per_class": {
+          "Favour": {
+            "precision": 0.7815,
+            "recall": 0.5962,
+            "f1": 0.6764,
+            "support": 156
+          },
+          "Against": {
+            "precision": 0.6,
+            "recall": 0.1429,
+            "f1": 0.2308,
+            "support": 21
+          },
+          "None": {
+            "precision": 0.814,
+            "recall": 0.9335,
+            "f1": 0.8697,
+            "support": 361
+          }
+        },
+        "confusion_matrix": {
+          "rows_gold_cols_pred": [
+            "Favour",
+            "Against",
+            "None"
+          ],
+          "matrix": [
+            [
+              93,
+              0,
+              63
+            ],
+            [
+              4,
+              3,
+              14
+            ],
+            [
+              22,
+              2,
+              337
+            ]
+          ]
+        },
+        "ci95": {
+          "macro_f1": [
+            0.5155,
+            0.6753
+          ],
+          "against_f1": [
+            0.0,
+            0.4547
+          ],
+          "n_resamples": 1000,
+          "seed": 44
+        },
+        "by_lang": {
+          "bn": {
+            "n": 211,
+            "macro_f1": 0.6372,
+            "against_f1": 0.4
+          },
+          "hi": {
+            "n": 327,
+            "macro_f1": 0.5652,
+            "against_f1": 0.1905
+          }
+        },
+        "by_script": {
+          "bengali": {
+            "n": 75,
+            "macro_f1": 0.6103,
+            "against_f1": 0.4
+          },
+          "devanagari": {
+            "n": 67,
+            "macro_f1": 0.5392,
+            "against_f1": 0.0
+          },
+          "latin": {
+            "n": 331,
+            "macro_f1": 0.5724,
+            "against_f1": 0.2353
+          },
+          "mixed": {
+            "n": 65,
+            "macro_f1": 0.4875,
+            "against_f1": 0.0
+          }
+        },
+        "by_tag": {
+          "sarcasm": {
+            "n": 30,
+            "macro_f1": 0.3379,
+            "against_f1": 0.1429,
+            "accuracy": 0.4667
+          },
+          "implicit": {
+            "n": 96,
+            "macro_f1": 0.2361,
+            "against_f1": 0.0,
+            "accuracy": 0.5312
+          },
+          "code_mixed": {
+            "n": 75,
+            "macro_f1": 0.6562,
+            "against_f1": 0.4,
+            "accuracy": 0.8
+          },
+          "romanised": {
+            "n": 269,
+            "macro_f1": 0.5803,
+            "against_f1": 0.2353,
+            "accuracy": 0.8104
+          },
+          "question": {
+            "n": 22,
+            "macro_f1": 0.6667,
+            "against_f1": 0.0,
+            "accuracy": 1.0
+          }
+        }
+      },
+      "tuned": {
+        "n": 538,
+        "macro_f1": 0.5125,
+        "against_f1": 0.0,
+        "accuracy": 0.8011,
+        "per_class": {
+          "Favour": {
+            "precision": 0.7845,
+            "recall": 0.5833,
+            "f1": 0.6691,
+            "support": 156
+          },
+          "Against": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "support": 21
+          },
+          "None": {
+            "precision": 0.8057,
+            "recall": 0.9418,
+            "f1": 0.8685,
+            "support": 361
+          }
+        },
+        "confusion_matrix": {
+          "rows_gold_cols_pred": [
+            "Favour",
+            "Against",
+            "None"
+          ],
+          "matrix": [
+            [
+              91,
+              0,
+              65
+            ],
+            [
+              4,
+              0,
+              17
+            ],
+            [
+              21,
+              0,
+              340
+            ]
+          ]
+        },
+        "ci95": {
+          "macro_f1": [
+            0.485,
+            0.539
+          ],
+          "against_f1": [
+            0.0,
+            0.0
+          ],
+          "n_resamples": 1000,
+          "seed": 44
+        },
+        "by_lang": {
+          "bn": {
+            "n": 211,
+            "macro_f1": 0.503,
+            "against_f1": 0.0
+          },
+          "hi": {
+            "n": 327,
+            "macro_f1": 0.4991,
+            "against_f1": 0.0
+          }
+        },
+        "by_script": {
+          "bengali": {
+            "n": 75,
+            "macro_f1": 0.4745,
+            "against_f1": 0.0
+          },
+          "devanagari": {
+            "n": 67,
+            "macro_f1": 0.5282,
+            "against_f1": 0.0
+          },
+          "latin": {
+            "n": 331,
+            "macro_f1": 0.4958,
+            "against_f1": 0.0
+          },
+          "mixed": {
+            "n": 65,
+            "macro_f1": 0.4875,
+            "against_f1": 0.0
+          }
+        },
+        "by_tag": {
+          "sarcasm": {
+            "n": 30,
+            "macro_f1": 0.2963,
+            "against_f1": 0.0,
+            "accuracy": 0.4667
+          },
+          "implicit": {
+            "n": 96,
+            "macro_f1": 0.2331,
+            "against_f1": 0.0,
+            "accuracy": 0.5208
+          },
+          "code_mixed": {
+            "n": 75,
+            "macro_f1": 0.5201,
+            "against_f1": 0.0,
+            "accuracy": 0.7867
+          },
+          "romanised": {
+            "n": 269,
+            "macro_f1": 0.5044,
+            "against_f1": 0.0,
+            "accuracy": 0.8104
+          },
+          "question": {
+            "n": 22,
+            "macro_f1": 0.6667,
+            "against_f1": 0.0,
+            "accuracy": 1.0
+          }
+        }
+      }
+    }
+  }
+}

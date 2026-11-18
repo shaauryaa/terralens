@@ -1,4 +1,6 @@
 # E4: QLoRA (PEFT) on Qwen3-4B as a 3-way sequence classifier (4-bit base, LoRA r=16), seed 42.
+# Trained on the best config's data (e3_best_plus_bcd: Source A train + translated + romanised + synthetic).
+# 1 epoch: 2 epochs were projected at 194 min on a T4 (over the 2 h limit).
 exp_id: e4_qlora
 model_name: Qwen/Qwen3-4B
 max_length: 160
@@ -6,7 +8,7 @@ lr: 2.0e-4
 batch_size: 8
 grad_accum: 4
 eval_batch_size: 32
-epochs: 2
+epochs: 1
 warmup_ratio: 0.1
 weight_decay: 0.0
 fp16: true
@@ -18,5 +20,9 @@ qlora:
   alpha: 32
   dropout: 0.05
   gradient_checkpointing: true
-extra_train: []
-time_budget_minutes: 110
+extra_train:
+  - data/processed/translated.csv
+  - data/processed/romanised.csv
+  - data/processed/synthetic.csv
+train_data_from: e3_best_plus_bcd
+time_budget_minutes: 120

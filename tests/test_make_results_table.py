@@ -36,5 +36,7 @@ def test_best_by_val_ignores_seed_runs_and_seed_table():
 
 
 def test_skipped_run_is_shown_as_skipped():
-    rows = {r[1]: r for r in mrt.main_rows({"e4_qlora": {"kind": "skipped", "reason": "projected 300 min"}})}
+    res = {"e4_qlora": {"kind": "skipped", "reason": "projected 300 min"}}
+    rows = {r[1]: r for r in mrt.main_rows(res)}
     assert rows["e4_qlora"][3].startswith("skipped")
+    assert mrt.lang_rows(res) == [] and "skipped" in mrt.build(res)

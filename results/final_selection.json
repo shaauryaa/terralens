@@ -1,0 +1,40 @@
+{
+  "experiment_id": "final_selection",
+  "script": "scripts/run_final.py",
+  "seed": 42,
+  "rule": "highest val Macro F1 (tie: val Against F1); test not used",
+  "candidates": {
+    "configs/e2_xlmr.yaml": {
+      "exp_id": "e2_xlmr",
+      "val_macro_f1": 0.4711,
+      "val_against_f1": 0.0
+    },
+    "configs/e2_muril.yaml": {
+      "exp_id": "e2_muril",
+      "val_macro_f1": 0.5125,
+      "val_against_f1": 0.0
+    },
+    "configs/e2_indicbertv2.yaml": {
+      "exp_id": "e2_indicbertv2",
+      "val_macro_f1": 0.6046,
+      "val_against_f1": 0.25
+    },
+    "configs/e2_mmbert.yaml": {
+      "exp_id": "e2_mmbert",
+      "val_macro_f1": 0.6608,
+      "val_against_f1": 0.4516
+    },
+    "configs/e3_best_plus_b.yaml": {
+      "exp_id": "e3_best_plus_b",
+      "val_macro_f1": 0.6609,
+      "val_against_f1": 0.3871
+    },
+    "configs/e3_best_plus_bcd.yaml": {
+      "exp_id": "e3_best_plus_bcd",
+      "val_macro_f1": 0.6741,
+      "val_against_f1": 0.4706
+    }
+  },
+  "best_config": "configs/e3_best_plus_bcd.yaml",
+  "best_exp_id": "e3_best_plus_bcd"
+}
