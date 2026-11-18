@@ -1,0 +1,199 @@
+{
+  "experiment_id": "external_datasets",
+  "script": "scripts/download_external.py",
+  "config": {
+    "datasets": [
+      "semeval",
+      "gwsd",
+      "climatestance",
+      "kaggle"
+    ],
+    "climatestance_repo": "roopalv54/finegrained-climate-change-social-media",
+    "climatestance_commit": "fa1023b459eef6761eeb77b682c6fa4666e3edfd",
+    "kaggle_ref": "edqian/twitter-climate-change-sentiment-dataset"
+  },
+  "seed": 42,
+  "timestamp": "2026-11-18T01:13:27+00:00",
+  "datasets": {
+    "climatestance_reddit": {
+      "status": "built",
+      "source_dataset": "climatestance",
+      "rows_kept": 303,
+      "counts_before_mapping": {
+        "annotator1": {
+          "-1": 69,
+          "0": 75,
+          "1": 185
+        },
+        "annotator2": {
+          "-1": 70,
+          "0": 69,
+          "1": 190
+        },
+        "agreed": {
+          "-1": 60,
+          "0": 65,
+          "1": 178
+        }
+      },
+      "counts_after_mapping": {
+        "Favour": 178,
+        "Against": 60,
+        "None": 65
+      },
+      "after_mapping_by_confidence": {
+        "approximate": 125,
+        "direct": 178
+      },
+      "excluded": {
+        "annotator_disagreement": 26
+      },
+      "has_text": true,
+      "notes": [
+        "annotators agree on 303/329 comments (92.1%)"
+      ],
+      "licence": {
+        "licence": "none stated: no LICENSE file and an empty README in the GitHub repo (GitHub API license=null), so all rights are reserved by default",
+        "attribution": "Vaid, Pant and Shrivastava (2022), Towards Fine-grained Classification of Climate Change related Social Media Text, ACL Student Research Workshop",
+        "restrictions": "tweets are released as IDs only, 'in accordance with the Twitter Terms of Service'; Reddit comments are user content under Reddit's terms",
+        "redistribute_text": false
+      },
+      "updated": "2026-11-18T01:13:27+00:00"
+    },
+    "climatestance_reddit_pseudo": {
+      "status": "built",
+      "source_dataset": "climatestance",
+      "rows_kept": 6208,
+      "counts_before_mapping": {
+        "-1": 185,
+        "1": 6077
+      },
+      "counts_after_mapping": {
+        "Favour": 6032,
+        "Against": 176,
+        "None": 0
+      },
+      "after_mapping_by_confidence": {
+        "uncertain": 6208
+      },
+      "excluded": {
+        "duplicate_text": 54
+      },
+      "has_text": true,
+      "notes": [
+        "labels are model predictions (paper: stance F1 0.343); 0 'ambiguous' predictions; r/climateskeptics comments labelled {'1': 2412, '-1': 122} -- do not use without relabelling"
+      ],
+      "licence": {
+        "licence": "none stated: no LICENSE file and an empty README in the GitHub repo (GitHub API license=null), so all rights are reserved by default",
+        "attribution": "Vaid, Pant and Shrivastava (2022), Towards Fine-grained Classification of Climate Change related Social Media Text, ACL Student Research Workshop",
+        "restrictions": "tweets are released as IDs only, 'in accordance with the Twitter Terms of Service'; Reddit comments are user content under Reddit's terms",
+        "redistribute_text": false
+      },
+      "updated": "2026-11-18T01:13:27+00:00"
+    },
+    "climatestance_tweet_ids": {
+      "status": "built",
+      "source_dataset": "climatestance",
+      "rows_kept": 3777,
+      "counts_before_mapping": {
+        "-1": 373,
+        "0": 414,
+        "1": 2990
+      },
+      "counts_after_mapping": {
+        "Favour": 2990,
+        "Against": 373,
+        "None": 414
+      },
+      "after_mapping_by_confidence": {
+        "approximate": 787,
+        "direct": 2990
+      },
+      "excluded": {},
+      "has_text": false,
+      "notes": [
+        "text not available (IDs only, Twitter terms); needs hydration through the X API"
+      ],
+      "licence": {
+        "licence": "none stated: no LICENSE file and an empty README in the GitHub repo (GitHub API license=null), so all rights are reserved by default",
+        "attribution": "Vaid, Pant and Shrivastava (2022), Towards Fine-grained Classification of Climate Change related Social Media Text, ACL Student Research Workshop",
+        "restrictions": "tweets are released as IDs only, 'in accordance with the Twitter Terms of Service'; Reddit comments are user content under Reddit's terms",
+        "redistribute_text": false
+      },
+      "updated": "2026-11-18T01:13:27+00:00"
+    },
+    "gwsd": {
+      "status": "built",
+      "source_dataset": "gwsd",
+      "rows_kept": 2050,
+      "counts_before_mapping": {
+        "agree": 777,
+        "disagree": 400,
+        "neutral": 873
+      },
+      "counts_after_mapping": {
+        "Favour": 777,
+        "Against": 400,
+        "None": 873
+      },
+      "after_mapping_by_confidence": {
+        "direct": 2050
+      },
+      "excluded": {},
+      "has_text": true,
+      "notes": [
+        "250 attention-check rows dropped (no annotator scores)"
+      ],
+      "licence": {
+        "licence": "not re-checked in T2",
+        "redistribute_text": null
+      },
+      "updated": "2026-11-18T01:13:27+00:00"
+    },
+    "kaggle_climate_sentiment": {
+      "status": "not run yet: raw file not downloaded (Kaggle API not configured)",
+      "source_dataset": "kaggle_climate_sentiment",
+      "licence": {
+        "licence": "Kaggle licence field: 'Data files © Original Authors' (not an open licence)",
+        "attribution": "Edward Qian, Kaggle; collection funded by a Canada Foundation for Innovation JELF grant to Chris Bauch, University of Waterloo",
+        "restrictions": "contains full tweet text; X/Twitter developer terms allow sharing tweet IDs, not text",
+        "redistribute_text": false
+      },
+      "updated": "2026-11-18T01:13:27+00:00"
+    },
+    "semeval_climate": {
+      "status": "built",
+      "source_dataset": "semeval2016_climate",
+      "rows_kept": 564,
+      "counts_before_mapping": {
+        "0": 203,
+        "1": 26,
+        "2": 335
+      },
+      "counts_after_mapping": {
+        "Favour": 335,
+        "Against": 26,
+        "None": 203
+      },
+      "after_mapping_by_confidence": {
+        "direct": 564
+      },
+      "excluded": {},
+      "has_text": true,
+      "notes": [],
+      "licence": {
+        "licence": "not re-checked in T2",
+        "redistribute_text": null
+      },
+      "updated": "2026-11-18T01:13:27+00:00"
+    }
+  },
+  "cross_dataset_text_overlap": {
+    "climatestance_reddit|climatestance_reddit_pseudo": 1,
+    "climatestance_reddit|gwsd": 0,
+    "climatestance_reddit|semeval_climate": 0,
+    "climatestance_reddit_pseudo|gwsd": 0,
+    "climatestance_reddit_pseudo|semeval_climate": 0,
+    "gwsd|semeval_climate": 0
+  }
+}
