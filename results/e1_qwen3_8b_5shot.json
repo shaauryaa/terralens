@@ -1,0 +1,307 @@
+{
+  "experiment_id": "e1_qwen3_8b_5shot",
+  "timestamp": "2026-11-18T09:34:33+00:00",
+  "kind": "llm_prompt",
+  "config": {
+    "shots": 5,
+    "shot_quota": {
+      "Favour": 2,
+      "Against": 2,
+      "None": 1
+    },
+    "max_shot_tokens": 40,
+    "max_new_tokens": 8,
+    "batch_size": 8,
+    "load_in_4bit": true,
+    "compute_dtype": "float16",
+    "seed": 42,
+    "max_comment_chars": 600,
+    "n_boot": 1000,
+    "model_name": "Qwen/Qwen3-8B"
+  },
+  "seed": 42,
+  "dry_run_limit": null,
+  "environment": {
+    "python": "3.13.16",
+    "platform": "Linux-6.18.55+-x86_64-with-glibc2.39",
+    "torch": "2.11.0+cu130",
+    "cuda": "Tesla T4",
+    "transformers": "5.20.2"
+  },
+  "few_shot_ids": [
+    "Ugx3WNKpk4EcDWKpL2B4AaABAg.8rdIAYpnG6q8reLIEADDr8",
+    "UgybiNE8H1rN0ys2sbp4AaABAg",
+    "UgzsvUpycNhlkz0T4UB4AaABAg",
+    "UgxL9MIOi0PoFfo8S5F4AaABAg.A2qNE9o7EN-A2qXONbWaEc",
+    "Ugwq3-r4vapJftQ8wlx4AaABAg"
+  ],
+  "few_shot_labels": [
+    "Favour",
+    "Against",
+    "None",
+    "Favour",
+    "Against"
+  ],
+  "prompt_instruction": "You classify the stance of a YouTube comment (Hindi or Bengali; native script, romanised or code-mixed) toward the claim:\n\"Climate change and global warming is a serious concern.\"\nLabel what the writer believes about this claim.\n\nLabels:\n- Favour: agrees climate change / global warming is real, serious, harmful or worth acting on; criticises deniers; worries about heat, floods or melting glaciers as signs of climate change; calls for action because of climate change.\n- Against: denies it, calls it a hoax, propaganda, scam or exaggeration; says it is natural or normal so not a concern; says climate does not matter compared with other issues; mocks people who worry about it.\n- None: no position on the claim: off-topic, about the video or channel, greetings, spam, genuine questions, neutral facts, blame without a view on seriousness, or unclear.\n\nRules: mentioning weather or climate is not enough; label sarcasm by its intended meaning; watch for negation; a rhetorical question with a clear lean takes that lean; if unsure, answer None.\n\nAnswer with exactly one word: Favour, Against or None.",
+  "seconds_model_load": 24.1,
+  "val": {
+    "n": 522,
+    "macro_f1": 0.5252,
+    "against_f1": 0.186,
+    "accuracy": 0.8084,
+    "per_class": {
+      "Favour": {
+        "precision": 0.5303,
+        "recall": 0.473,
+        "f1": 0.5,
+        "support": 74
+      },
+      "Against": {
+        "precision": 0.1667,
+        "recall": 0.2105,
+        "f1": 0.186,
+        "support": 19
+      },
+      "None": {
+        "precision": 0.8866,
+        "recall": 0.8928,
+        "f1": 0.8897,
+        "support": 429
+      }
+    },
+    "confusion_matrix": {
+      "rows_gold_cols_pred": [
+        "Favour",
+        "Against",
+        "None"
+      ],
+      "matrix": [
+        [
+          35,
+          4,
+          35
+        ],
+        [
+          1,
+          4,
+          14
+        ],
+        [
+          30,
+          16,
+          383
+        ]
+      ]
+    },
+    "ci95": {
+      "macro_f1": [
+        0.4612,
+        0.5851
+      ],
+      "against_f1": [
+        0.0444,
+        0.3335
+      ],
+      "n_resamples": 1000,
+      "seed": 42
+    },
+    "by_lang": {
+      "bn": {
+        "n": 165,
+        "macro_f1": 0.5516,
+        "against_f1": 0.4286
+      },
+      "hi": {
+        "n": 357,
+        "macro_f1": 0.485,
+        "against_f1": 0.069
+      }
+    },
+    "by_script": {
+      "bengali": {
+        "n": 130,
+        "macro_f1": 0.5544,
+        "against_f1": 0.4286
+      },
+      "devanagari": {
+        "n": 150,
+        "macro_f1": 0.5401,
+        "against_f1": 0.1667
+      },
+      "latin": {
+        "n": 226,
+        "macro_f1": 0.4128,
+        "against_f1": 0.0
+      },
+      "mixed": {
+        "n": 16,
+        "macro_f1": 0.6667,
+        "against_f1": 0.0
+      }
+    },
+    "by_tag": {
+      "sarcasm": {
+        "n": 19,
+        "macro_f1": 0.2828,
+        "against_f1": 0.1818,
+        "accuracy": 0.5263
+      },
+      "implicit": {
+        "n": 44,
+        "macro_f1": 0.2333,
+        "against_f1": 0.0,
+        "accuracy": 0.4545
+      },
+      "code_mixed": {
+        "n": 63,
+        "macro_f1": 0.5003,
+        "against_f1": 0.0,
+        "accuracy": 0.7778
+      },
+      "romanised": {
+        "n": 269,
+        "macro_f1": 0.4479,
+        "against_f1": 0.0,
+        "accuracy": 0.7993
+      },
+      "question": {
+        "n": 28,
+        "macro_f1": 0.3273,
+        "against_f1": 0.0,
+        "accuracy": 0.9643
+      }
+    },
+    "parse_failures": 0,
+    "seconds": 362.9
+  },
+  "test": {
+    "n": 538,
+    "macro_f1": 0.6762,
+    "against_f1": 0.5098,
+    "accuracy": 0.7974,
+    "per_class": {
+      "Favour": {
+        "precision": 0.7963,
+        "recall": 0.5513,
+        "f1": 0.6515,
+        "support": 156
+      },
+      "Against": {
+        "precision": 0.4333,
+        "recall": 0.619,
+        "f1": 0.5098,
+        "support": 21
+      },
+      "None": {
+        "precision": 0.825,
+        "recall": 0.9141,
+        "f1": 0.8673,
+        "support": 361
+      }
+    },
+    "confusion_matrix": {
+      "rows_gold_cols_pred": [
+        "Favour",
+        "Against",
+        "None"
+      ],
+      "matrix": [
+        [
+          86,
+          6,
+          64
+        ],
+        [
+          2,
+          13,
+          6
+        ],
+        [
+          20,
+          11,
+          330
+        ]
+      ]
+    },
+    "ci95": {
+      "macro_f1": [
+        0.6075,
+        0.7358
+      ],
+      "against_f1": [
+        0.3242,
+        0.6667
+      ],
+      "n_resamples": 1000,
+      "seed": 42
+    },
+    "by_lang": {
+      "bn": {
+        "n": 211,
+        "macro_f1": 0.7606,
+        "against_f1": 0.5714
+      },
+      "hi": {
+        "n": 327,
+        "macro_f1": 0.6375,
+        "against_f1": 0.5
+      }
+    },
+    "by_script": {
+      "bengali": {
+        "n": 144,
+        "macro_f1": 0.765,
+        "against_f1": 0.5714
+      },
+      "devanagari": {
+        "n": 136,
+        "macro_f1": 0.6332,
+        "against_f1": 0.5
+      },
+      "latin": {
+        "n": 242,
+        "macro_f1": 0.6224,
+        "against_f1": 0.5
+      },
+      "mixed": {
+        "n": 16,
+        "macro_f1": 0.5877,
+        "against_f1": 0.0
+      }
+    },
+    "by_tag": {
+      "sarcasm": {
+        "n": 30,
+        "macro_f1": 0.4545,
+        "against_f1": 0.6364,
+        "accuracy": 0.6333
+      },
+      "implicit": {
+        "n": 96,
+        "macro_f1": 0.2059,
+        "against_f1": 0.0,
+        "accuracy": 0.4375
+      },
+      "code_mixed": {
+        "n": 75,
+        "macro_f1": 0.7111,
+        "against_f1": 0.6667,
+        "accuracy": 0.8
+      },
+      "romanised": {
+        "n": 269,
+        "macro_f1": 0.634,
+        "against_f1": 0.4706,
+        "accuracy": 0.7918
+      },
+      "question": {
+        "n": 22,
+        "macro_f1": 0.6667,
+        "against_f1": 0.0,
+        "accuracy": 1.0
+      }
+    },
+    "parse_failures": 0,
+    "seconds": 396.8
+  }
+}
