@@ -2,7 +2,7 @@
   "experiment_id": "near_dup_check",
   "script": "scripts/near_dup_check.py",
   "seed": null,
-  "timestamp": "2026-11-18T09:28:57+00:00",
+  "timestamp": "2026-11-18T09:42:52+00:00",
   "config": {
     "threshold": 0.9,
     "ngram_range": [
@@ -18,8 +18,16 @@
     "challenge": 217
   },
   "files": {
-    "translated.csv": "not built",
-    "romanised.csv": "not built",
+    "translated.csv": {
+      "rows": 7991,
+      "dropped": 0,
+      "dropped_by_set": {}
+    },
+    "romanised.csv": {
+      "rows": 3053,
+      "dropped": 0,
+      "dropped_by_set": {}
+    },
     "synthetic.csv": {
       "rows": 470,
       "dropped": 0,

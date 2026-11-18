@@ -114,10 +114,10 @@ def kaggle(args: list[str], env: dict, check: bool = True) -> subprocess.Complet
     return r
 
 
-def code_tarball() -> bytes:
+def code_tarball(include: list[str] | None = None) -> bytes:
     buf = io.BytesIO()
     with tarfile.open(fileobj=buf, mode="w:gz") as tar:
-        for rel in CODE_DIRS + CODE_FILES:
+        for rel in CODE_DIRS + CODE_FILES + list(include or []):
             path = ROOT / rel
             if not path.exists():
                 continue
@@ -131,11 +131,11 @@ def code_tarball() -> bytes:
 
 
 def build_kernel(name: str, commands: list[str], user: str, pip: list[str], datasets: list[str],
-                 internet: bool = True, gpu: bool = True) -> Path:
+                 internet: bool = True, gpu: bool = True, include: list[str] | None = None) -> Path:
     folder = BUILD / name
     shutil.rmtree(folder, ignore_errors=True)
     folder.mkdir(parents=True)
-    code = base64.b64encode(code_tarball()).decode()
+    code = base64.b64encode(code_tarball(include)).decode()
     (folder / "run.py").write_text(KERNEL_TEMPLATE.format(name=name, code_b64=code, commands=commands, pip=pip),
                                    encoding="utf-8")
     meta = {"id": f"{user}/terralens-{name}", "title": f"terralens-{name}", "code_file": "run.py",
@@ -173,7 +173,7 @@ def cmd_dataset(args, env) -> None:
 
 def cmd_push(args, env) -> None:
     folder = build_kernel(args.name, args.cmd, env["KAGGLE_USERNAME"], args.pip, args.dataset,
-                          internet=True, gpu=not args.cpu)
+                          internet=True, gpu=not args.cpu, include=args.include)
     print(f"built {folder.relative_to(ROOT)} ({(folder / 'run.py').stat().st_size / 1e3:.0f} kB)")
     if args.limit:
         print("Dry run: not pushed.")
@@ -229,6 +229,7 @@ def main(argv=None) -> None:
     k.add_argument("--dataset", nargs="*", default=[DATASET_SLUG])
     k.add_argument("--timeout", type=int, default=None, help="kernel run-time limit in seconds")
     k.add_argument("--cpu", action="store_true")
+    k.add_argument("--include", nargs="*", default=[], help="extra repo files to bundle (e.g. results/e2_mmbert.json)")
     k.add_argument("--limit", type=int, default=None, help="dry run: build the folder only")
     for name in ("status", "fetch"):
         s = sub.add_parser(name)

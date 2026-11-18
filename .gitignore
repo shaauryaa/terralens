@@ -67,3 +67,4 @@ results/predictions/
 # --- Generated data sets (challenge set is data) ---
 data/challenge/*
 !data/challenge/.gitkeep
+configs/_e4_qlora_resolved.yaml
