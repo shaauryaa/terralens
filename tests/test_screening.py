@@ -33,6 +33,10 @@ CFG = {**cy.SCREEN_DEFAULTS, "target_per_language": [1, 2], "max_per_channel": 2
     ("Nice video 👍👍", "other"),
     ("🔥🔥🔥", "other"),
     ("@someone_xy hai bhai", "hi"),                          # handle removed before checking
+    ("sir aap bahut achha padhate", "hi"),                   # added words: bahut, achha
+    ("Thank you vaiya, onek valo laglo", "bn"),              # added words: vaiya, valo
+    ("ami Dhaka theke dekhchi ar shikhchi", "bn"),           # added words: theke, ar
+    ("nai", "indic"),                                        # 'nai' is in both lists -> tie
     ("hai na", "indic"),                                     # 1 Hindi + 1 Bengali marker -> tie
 ])
 def test_comment_language(text, expected):

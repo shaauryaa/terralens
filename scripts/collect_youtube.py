@@ -69,12 +69,14 @@ from terralens.preprocess import (  # noqa: E402
 
 # Romanised Hindi / Bengali marker words for the rule-based language check (whole words, any case).
 # A Latin-script comment counts as romanised Hindi/Bengali only if it contains at least one of them.
-# Extend these lists freely; "ki" is in both on purpose.
+# Extend these lists freely; "ki" and "nai" are in both on purpose.
 ROMANISED_KEYWORDS = {
     "hi": ["hai", "hain", "nahi", "nahin", "kya", "bhai", "ki", "ka", "ke", "aur", "mein", "ho", "tha",
-           "raha", "sab", "yeh", "ye", "kuch"],
+           "raha", "sab", "yeh", "ye", "kuch",
+           "bhaiya", "bahut", "achha", "accha", "nai"],
     "bn": ["ami", "tumi", "ache", "achhe", "na", "kore", "hobe", "eta", "dada", "khub", "amra", "ki", "keno",
-           "holo", "bhalo"],
+           "holo", "bhalo",
+           "valo", "vaiya", "nai", "hoy", "theke", "ar"],
 }
 
 DEFAULT_CONFIG = ROOT / "configs" / "youtube_search.yaml"
@@ -339,6 +341,15 @@ def _comment_row(comment: dict, video_id: str, query_lang: str, is_reply: int) -
         "is_reply": is_reply,
         "query_lang": query_lang,
     }
+
+
+def video_comment_cap(video_id: str, settings: dict, limit: int | None = None) -> int:
+    """Max comments to fetch for one video: the global cap, lowered by `per_video_max_comments` and --limit."""
+    cap = int(settings.get("max_comments_per_video", 150))
+    per_video = settings.get("per_video_max_comments") or {}
+    if video_id in per_video:
+        cap = min(cap, int(per_video[video_id]))
+    return min(cap, limit) if limit else cap
 
 
 def error_reason(err) -> str:
@@ -1066,10 +1077,19 @@ def load_state(path: Path) -> dict:
     return json.loads(path.read_text(encoding="utf-8")) if path.exists() else {}
 
 
-def save_state(path: Path, state: dict) -> None:
+def save_state(path: Path, state: dict, attempts: int = 20) -> None:
+    """Atomically write the fetch state. On Windows the replace can fail for a moment while another
+    process (editor file watcher, antivirus, indexer) holds the target, so it is retried briefly."""
     tmp = path.with_suffix(".tmp")
     tmp.write_text(json.dumps(state, indent=1), encoding="utf-8")
-    tmp.replace(path)
+    for i in range(attempts):
+        try:
+            tmp.replace(path)
+            return
+        except PermissionError:
+            if i == attempts - 1:
+                raise
+            time.sleep(0.25)
 
 
 def append_rows(path: Path, rows: list[dict]) -> None:
@@ -1083,10 +1103,9 @@ def run_fetch(config: dict, limit: int | None) -> int:
     from googleapiclient.errors import HttpError
 
     settings = config.get("settings", {})
-    cap = int(settings.get("max_comments_per_video", 150))
+    cap = video_comment_cap("", settings, limit)  # default cap, for the log line
+    n_lower = len(settings.get("per_video_max_comments") or {})
     order = settings.get("comment_order", "relevance")
-    if limit:
-        cap = min(cap, limit)
 
     cand_path = dryrun_path(CANDIDATES_CSV, limit) if limit and dryrun_path(CANDIDATES_CSV, limit).exists() \
         else CANDIDATES_CSV
@@ -1105,7 +1124,8 @@ def run_fetch(config: dict, limit: int | None) -> int:
     state = load_state(state_path)
     todo = [r for r in cands.itertuples(index=False) if not state.get(r.video_id, {}).get("done")]
     print(f"fetch: {len(cands)} kept videos from {cand_path.relative_to(ROOT)} "
-          f"({len(cands) - len(todo)} already done), up to {cap} comments each, order={order}")
+          f"({len(cands) - len(todo)} already done), up to {cap} comments each "
+          f"({n_lower} videos with a lower cap), order={order}")
 
     youtube = build_client(get_api_key())
     quota_hit = False
@@ -1113,18 +1133,19 @@ def run_fetch(config: dict, limit: int | None) -> int:
         vid = row.video_id
         lang = getattr(row, "query_lang", None) or row.lang  # `screen` moves the search language to query_lang
         st = state.setdefault(vid, {"done": False, "n": 0, "next_page_token": None})
+        vcap = video_comment_cap(vid, settings, limit)
         try:
-            while st["n"] < cap:
+            while st["n"] < vcap:
                 req = youtube.commentThreads().list(
                     part="snippet,replies",
                     videoId=vid,
-                    maxResults=min(100, cap - st["n"]),
+                    maxResults=min(100, vcap - st["n"]),
                     order=order,
                     textFormat="plainText",
                     pageToken=st["next_page_token"] or None,
                 )
                 resp = execute(req)
-                rows = parse_comment_threads(resp, vid, lang)[: cap - st["n"]]
+                rows = parse_comment_threads(resp, vid, lang)[: vcap - st["n"]]
                 append_rows(out_csv, rows)
                 st["n"] += len(rows)
                 st["next_page_token"] = resp.get("nextPageToken")

@@ -129,6 +129,39 @@ def test_error_reason_reads_quota_and_disabled_reasons():
     assert cy.error_reason(_FakeHttpError({"oops": 1})) == ""
 
 
+def test_video_comment_cap_uses_per_video_override_and_limit():
+    settings = {"max_comments_per_video": 150, "per_video_max_comments": {"lesson": 50, "big": 500}}
+    assert cy.video_comment_cap("other", settings) == 150
+    assert cy.video_comment_cap("lesson", settings) == 50
+    assert cy.video_comment_cap("big", settings) == 150          # an override never raises the cap
+    assert cy.video_comment_cap("lesson", settings, limit=2) == 2
+    assert cy.video_comment_cap("x", {}) == 150
+
+
+def test_real_config_caps_school_lessons_at_50():
+    settings = cy.load_config(cy.DEFAULT_CONFIG)["settings"]
+    assert len(settings["per_video_max_comments"]) == 9
+    assert all(cy.video_comment_cap(v, settings) == 50 for v in settings["per_video_max_comments"])
+
+
+def test_save_state_retries_when_target_is_briefly_locked(tmp_path, monkeypatch):
+    path = tmp_path / "state.json"
+    real_replace = type(path).replace
+    calls = {"n": 0}
+
+    def flaky_replace(self, target):
+        calls["n"] += 1
+        if calls["n"] < 3:
+            raise PermissionError("[WinError 5] Access is denied")
+        return real_replace(self, target)
+
+    monkeypatch.setattr(type(path), "replace", flaky_replace)
+    monkeypatch.setattr(cy.time, "sleep", lambda s: None)
+    cy.save_state(path, {"a": {"done": True}})
+    assert calls["n"] == 3
+    assert json.loads(path.read_text(encoding="utf-8")) == {"a": {"done": True}}
+
+
 def test_dryrun_paths_do_not_touch_real_outputs():
     assert cy.dryrun_path(cy.COMMENTS_CSV, 2).name == "youtube_comments.dryrun.csv"
     assert cy.dryrun_path(cy.COMMENTS_CSV, None) == cy.COMMENTS_CSV

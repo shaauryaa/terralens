@@ -7,6 +7,18 @@ settings:
   max_results_per_query: 50        # videos per query (API max; costs the same 100 units as 15)
   min_comment_count: 30            # skip videos with too few comments
   max_comments_per_video: 150      # cap so no video dominates
+  # Lower caps for specific videos (used by `fetch`). Bengali school essay/paragraph lessons: comments are
+  # mostly "thank you sir"; 50 keeps some real None comments without flooding the data.
+  per_video_max_comments:
+    aQyHGAgDRkM: 50   # HSC climate change paragraph (Pavel's HSC English)
+    Pk3FkgKxtoA: 50   # Paragraph on global warming (Youtube technique studio)
+    MLPKR1GGAmM: 50   # Summer project: global warming (Dadar Classroom)
+    _z3PZP4rylM: 50   # Global warming essay (Priti Education)
+    Cm_gnzWaUjk: 50   # Class 5 science: climate change (mili tutorial)
+    Wh2qDrKDB9Q: 50   # Weather, climate and climate change (Lights Way)
+    MCMs-VOjiSI: 50   # Climate change paragraph (Akinuzzaman Akond)
+    DQcl3_JWZpE: 50   # Global warming essay (Paper and Colours)
+    cWubLF2nbTI: 50   # Climate change causes and remedies (Sultan Mahmud)
   published_after: "2019-01-01T00:00:00Z"
   region_code: IN                  # Bengali queries also run with BD (see below)
 
