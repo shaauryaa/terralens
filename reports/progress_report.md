@@ -80,7 +80,9 @@ scores and CIs are in `reports/results.md` (built from `results/*.json` by `scri
   0.631; E4 0.653 vs 0.678).
 - **Robustness** (E3 mmBERT + B + C + D, 3 seeds, `results/robustness_e3_best_plus_bcd.json`): noisy test copy 0.583
   ± 0.028 vs clean 0.587 ± 0.024 (drop 0.005 ± 0.005); challenge set 0.757 ± 0.042, weakest on sarcasm (0.670) and
-  implicit stance (0.684). Robustness of E4: E4_ROBUST_PLACEHOLDER
+  implicit stance (0.684). Robustness of E4 (one retrained run, seed 42,
+  `results/robustness_e4_qlora.json`; the retrain is not bit-identical: val 0.657 vs 0.687, test 0.686 vs 0.678):
+  noisy test 0.677 vs clean 0.686 (drop 0.009); challenge set 0.825, weakest on implicit stance (0.704).
 - **Error analysis** (40 misclassified validation comments of E4, `notebooks/03_error_analysis.ipynb`): most errors
   are blame, politics or conspiracy talk (6), comments on the topic without a stance (5), generic agreement with
   the video (5), comments that need the video for context (4), sarcasm (4) and implicit stance (4).

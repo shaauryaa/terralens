@@ -57,6 +57,14 @@ Bengali test has only 4 Against comments, so per-language numbers for Bengali ar
 
 Challenge Macro F1 per phenomenon: implicit 0.684, negation 0.725, sarcasm 0.670, topic_not_target 0.873
 
+**robustness_e4_qlora** (1 runs: e4_qlora_robust)
+
+| Clean test Macro F1 | Noisy test Macro F1 | Drop | Clean test Against F1 | Noisy test Against F1 | Challenge Macro F1 | Challenge Against F1 |
+|---|---|---|---|---|---|---|
+| 0.686 ± 0.000 | 0.677 ± 0.000 | 0.009 ± 0.000 | 0.489 ± 0.000 | 0.435 ± 0.000 | 0.825 ± 0.000 | 0.815 ± 0.000 |
+
+Challenge Macro F1 per phenomenon: implicit 0.704, negation 0.829, sarcasm 0.818, topic_not_target 0.918
+
 ## 5. Data and annotation
 
 - Splits (seed 43, grouped by video): train 2765 (584 F / 60 A / 2121 N, 43 videos); val 522 (74 F / 19 A / 429 N, 11 videos); test 538 (156 F / 21 A / 361 N, 10 videos)
