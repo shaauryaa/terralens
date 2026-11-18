@@ -50,7 +50,40 @@ or the challenge set (`results/near_dup_check.json`). A separate challenge set o
 
 ## 3. Results
 
-RESULTS_PLACEHOLDER
+Validation: 522 comments (19 Against); test: 538 comments (21 Against). Full tables, per-language and per-script
+scores and CIs are in `reports/results.md` (built from `results/*.json` by `scripts/make_results_table.py`).
+
+| Exp | System | Val Macro F1 | Test Macro F1 [95% CI] | Test Against F1 |
+|---|---|---:|---:|---:|
+| E0 | Majority class (None) | 0.301 | 0.268 [0.258, 0.277] | 0.000 |
+| E1 | Qwen3-8B, zero-shot | 0.549 | 0.614 [0.523, 0.691] | 0.385 |
+| E1 | Qwen3-8B, 5-shot | 0.525 | 0.676 [0.608, 0.736] | 0.510 |
+| E1 | Gemma 3 12B, zero-shot | 0.583 | 0.672 [0.606, 0.728] | 0.423 |
+| E1 | Gemma 3 12B, 5-shot | 0.546 | 0.653 [0.599, 0.700] | 0.410 |
+| E2 | XLM-R base | 0.471 | 0.484 [0.456, 0.508] | 0.000 |
+| E2 | MuRIL base | 0.513 | 0.446 [0.417, 0.477] | 0.000 |
+| E2 | IndicBERT v2 | 0.605 | 0.574 [0.510, 0.636] | 0.238 |
+| E2 | mmBERT base | 0.661 | 0.631 [0.564, 0.695] | 0.318 |
+| E3 | mmBERT + translated | 0.661 | 0.585 [0.517, 0.647] | 0.200 |
+| E3 | mmBERT + translated + romanised + synthetic | 0.674 | 0.561 [0.504, 0.626] | 0.143 |
+| E4 | QLoRA Qwen3-4B on the E3 data (1 epoch) | **0.687** | 0.678 [0.598, 0.742] | 0.419 |
+
+- **Best model by validation: E4 QLoRA** (val Macro F1 0.687; test 0.678, Against F1 0.419). Among encoders, mmBERT is
+  clearly best; XLM-R and MuRIL never predict Against at the fixed settings (4 epochs, 60 Against in train).
+- **Seed variance** (seeds 42, 43, 44): E2 mmBERT val 0.628 ± 0.028, test 0.630 ± 0.023 (Against F1 0.320 ± 0.091);
+  E3 mmBERT + B + C + D val 0.665 ± 0.037, test 0.587 ± 0.024 (Against F1 0.202 ± 0.053). The training-only data
+  raises validation scores but lowers test scores for every seed, so the validation gain does not carry over.
+- **Validation and test disagree.** The prompted LLMs (E1) are below the encoders on validation but above them on
+  test. Validation has only 19 Against and 2 Bengali Favour comments, so selection on validation is noisy; choices
+  were still made on validation only, as planned.
+- **Decision offsets** tuned on validation never improved test Macro F1 for the best systems (E2 mmBERT 0.628 vs
+  0.631; E4 0.653 vs 0.678).
+- **Robustness** (E3 mmBERT + B + C + D, 3 seeds, `results/robustness_e3_best_plus_bcd.json`): noisy test copy 0.583
+  ± 0.028 vs clean 0.587 ± 0.024 (drop 0.005 ± 0.005); challenge set 0.757 ± 0.042, weakest on sarcasm (0.670) and
+  implicit stance (0.684). Robustness of E4: E4_ROBUST_PLACEHOLDER
+- **Error analysis** (40 misclassified validation comments of E4, `notebooks/03_error_analysis.ipynb`): most errors
+  are blame, politics or conspiracy talk (6), comments on the topic without a stance (5), generic agreement with
+  the video (5), comments that need the video for context (4), sarcasm (4) and implicit stance (4).
 
 ## 4. Challenges
 

@@ -213,7 +213,7 @@ def build(res: dict) -> str:
           "## 2. Test Macro F1 per language and script", "",
           table(["ID", "Hindi", "Bengali", "Devanagari", "Bengali script", "Latin", "Mixed"], lang_rows(res)),
           "Bengali test has only 4 Against comments, so per-language numbers for Bengali are noisy.", "",
-          "## 3. Seed variance (best configuration)", "",
+          "## 3. Seed variance (seeds 42, 43, 44)", "",
           (table(["Config", "Seeds", "Val Macro F1", "Test Macro F1", "Test Against F1", "Test Macro F1 (tuned offsets)"],
                  seed_rows(res)) if seed_rows(res) else "pending\n"),
           "## 4. Robustness", "", robustness_section(res),

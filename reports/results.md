@@ -40,10 +40,11 @@ Best E2 encoder by val Macro F1: **e2_mmbert**. Best encoder overall by val Macr
 
 Bengali test has only 4 Against comments, so per-language numbers for Bengali are noisy.
 
-## 3. Seed variance (best configuration)
+## 3. Seed variance (seeds 42, 43, 44)
 
 | Config | Seeds | Val Macro F1 | Test Macro F1 | Test Against F1 | Test Macro F1 (tuned offsets) |
 |---|---|---|---|---|---|
+| e2_mmbert | 42, 43, 44 | 0.628 ± 0.028 | 0.630 ± 0.023 | 0.320 ± 0.091 | 0.617 ± 0.018 |
 | e3_best_plus_bcd | 42, 43, 44 | 0.665 ± 0.037 | 0.587 ± 0.024 | 0.202 ± 0.053 | 0.561 ± 0.051 |
 
 ## 4. Robustness
