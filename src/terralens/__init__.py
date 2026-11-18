@@ -9,3 +9,5 @@ __version__ = "0.1.0"
 LABELS = ["Favour", "Against", "None"]
 LABEL2ID = {label: i for i, label in enumerate(LABELS)}
 ID2LABEL = {i: label for label, i in LABEL2ID.items()}
+
+CLAIM = "Climate change and global warming is a serious concern."

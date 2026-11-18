@@ -1,0 +1,15 @@
+# E2: mmBERT base fine-tuned on Source A train only (claim + comment as a sentence pair).
+exp_id: e2_mmbert
+model_name: jhu-clsp/mmBERT-base
+max_length: 128
+lr: 2.0e-5
+batch_size: 32
+grad_accum: 1
+epochs: 4
+warmup_ratio: 0.1
+weight_decay: 0.01
+fp16: true
+class_weighted: true
+early_stopping_patience: 2
+seed: 42
+extra_train: []
