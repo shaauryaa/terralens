@@ -8,7 +8,9 @@ gwsd          Global Warming Stance Dataset (Luo et al., 2020)                ->
 climatestance ClimateStance / ClimateReddit (Vaid et al., 2022), GitHub repo
               roopalv54/finegrained-climate-change-social-media (formerly serendipity5497/...),
               pinned to commit CLIMATESTANCE_COMMIT:
-                - climatestance_reddit.csv          329 Reddit comments, two human annotators
+                - climatestance_gold.csv            the 303 of 329 Reddit comments both human annotators
+                                                    agree on: gold check set for the T4 LLM labellers,
+                                                    not part of train / val / test
                 - climatestance_reddit_pseudo.csv   6262 Reddit comments, labels predicted by a model
                 - climatestance_tweet_ids.csv       3777 tweet IDs + labels; the repo has NO tweet text
                                                     (Twitter terms), so these cannot be used without hydration
@@ -42,6 +44,7 @@ import io
 import json
 import os
 import random
+import re
 import sys
 import urllib.error
 import urllib.request
@@ -382,19 +385,26 @@ def subreddit(permalink: str) -> str:
     return parts[2] if len(parts) > 2 else ""
 
 
-def build_climatestance_reddit(a1: pd.DataFrame, a2: pd.DataFrame) -> Built:
-    """Two-annotator Reddit set: keep comments where both annotators gave the same opinion label."""
+GOLD_CHECK_SPLIT = "gold_check"
+
+
+def build_climatestance_gold(a1: pd.DataFrame, a2: pd.DataFrame) -> Built:
+    """Human gold check set: the Reddit comments both annotators gave the same opinion label.
+
+    Used in T4 to score the LLM labellers against human labels. Not part of train / val / test;
+    it may be added to training data only after that check.
+    """
     if not a1["permalink"].reset_index(drop=True).equals(a2["permalink"].reset_index(drop=True)):
         raise ValueError("ClimateReddit annotator files are not row-aligned (permalinks differ)")
     df = a1.reset_index(drop=True).rename(columns={"opinion-label": "code_a1"})
     df["code_a2"] = a2["opinion-label"].reset_index(drop=True)
     df["text"] = df["body"].astype(str)
     df["original_id"] = df["permalink"].astype(str)
-    df["id"] = [f"climatestance_reddit_{i}" for i in range(len(df))]
-    df["source"] = "climatestance_reddit"
+    df["id"] = [f"climatestance_gold_{i}" for i in range(len(df))]
+    df["source"] = "climatestance_gold"
     df["source_dataset"] = "climatestance"
     df["lang"] = "en"
-    df["split"] = "test"  # the paper uses these 329 comments as the manual test set for the pseudo labels
+    df["split"] = GOLD_CHECK_SPLIT
 
     agree = df["code_a1"] == df["code_a2"]
     disagree = df.loc[~agree].copy()
@@ -408,8 +418,9 @@ def build_climatestance_reddit(a1: pd.DataFrame, a2: pd.DataFrame) -> Built:
         "annotator2": original_counts(df["code_a2"]),
         "agreed": original_counts(df.loc[agree, "code_a1"]),
     }
-    built = Built("climatestance_reddit", "climatestance", kept, excluded, counts_before)
+    built = Built("climatestance_gold", "climatestance", kept, excluded, counts_before)
     built.notes.append(f"annotators agree on {int(agree.sum())}/{len(df)} comments ({agree.mean():.1%})")
+    built.notes.append("gold check set for the T4 LLM labellers; not in train/val/test; training only after T4")
     return built
 
 
@@ -467,7 +478,7 @@ def download_climatestance(out_dir: Path, limit: int | None, dry_run: bool) -> l
     if limit:
         frames = {k: v.head(limit) for k, v in frames.items()}
     return [
-        build_climatestance_reddit(frames["reddit_a1"], frames["reddit_a2"]),
+        build_climatestance_gold(frames["reddit_a1"], frames["reddit_a2"]),
         build_climatestance_pseudo(frames["reddit_pseudo"]),
         build_climatestance_tweet_ids(frames),
     ]
@@ -524,6 +535,15 @@ def kaggle_api_download(dest: Path) -> Path | None:
     return path if path.exists() else None
 
 
+# UTF-8 text that was decoded as cp1252 (e.g. "â€¦" for "…", "Ã¢â‚¬Â¦" when it happened twice).
+MOJIBAKE_RE = re.compile("[ÃÂâ][\u0080-¿€‚ƒ„…†‡ˆ‰Š‹ŒŽ‘’“”•–—˜™š›œžŸ]")
+
+
+def count_mojibake(texts: pd.Series) -> int:
+    """Number of texts that contain cp1252-style mojibake. The text is reported, not changed."""
+    return int(texts.astype(str).str.contains(MOJIBAKE_RE).sum())
+
+
 def build_kaggle(raw: pd.DataFrame) -> Built:
     missing = KAGGLE_COLUMNS - set(raw.columns)
     if missing:
@@ -540,6 +560,9 @@ def build_kaggle(raw: pd.DataFrame) -> Built:
     built = Built("kaggle_climate_sentiment", "kaggle_climate_sentiment", kept, excluded,
                   original_counts(df["sentiment"]))
     built.notes.append("text holds @handles and URLs as published; clean before use")
+    built.notes.append(f"{count_mojibake(kept['text'])} kept rows contain mojibake (UTF-8 text decoded as "
+                       "cp1252, e.g. an ellipsis shown as three odd characters); text left as published, "
+                       "repair during cleaning")
     return built
 
 
@@ -610,7 +633,7 @@ def cross_overlap(frames: dict[str, pd.DataFrame]) -> dict:
 
 
 def existing_external_frames(out_dir: Path, skip: set[str]) -> dict[str, pd.DataFrame]:
-    names = ["semeval_climate", "gwsd", "climatestance_reddit", "climatestance_reddit_pseudo",
+    names = ["semeval_climate", "gwsd", "climatestance_gold", "climatestance_reddit_pseudo",
              "kaggle_climate_sentiment"]
     frames = {}
     for name in names:
@@ -620,11 +643,18 @@ def existing_external_frames(out_dir: Path, skip: set[str]) -> dict[str, pd.Data
     return frames
 
 
+# Output names that were renamed; their old entries are removed from the results JSON.
+RENAMED_OUTPUTS = {"climatestance_reddit": "climatestance_gold"}
+
+
 def update_results(path: Path, stats: dict, overlap: dict, args, pending: dict | None = None) -> None:
     """Merge this run's stats into the results JSON. ``pending`` entries never replace real stats."""
     previous = json.loads(path.read_text(encoding="utf-8")) if path.exists() else {}
     now = datetime.now(timezone.utc).isoformat(timespec="seconds")
     datasets = previous.get("datasets", {})
+    for old, new in RENAMED_OUTPUTS.items():
+        if new in stats:
+            datasets.pop(old, None)
     for name, s in stats.items():
         datasets[name] = {**s, "updated": now}
     for name, s in (pending or {}).items():

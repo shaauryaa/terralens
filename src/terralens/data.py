@@ -97,8 +97,23 @@ def load_external(name: str, external_dir: str | Path = EXTERNAL_DIR) -> pd.Data
     return df
 
 
-def load_all_external(names=("semeval_climate", "gwsd"), external_dir=EXTERNAL_DIR) -> pd.DataFrame:
-    """Concatenate several external datasets into the common schema."""
+# Human-labelled sets kept apart to score the LLM labellers (T4). They are not train / val / test data and
+# may only be added to training data after that check, by passing allow_gold_check=True explicitly.
+GOLD_CHECK_FILES = frozenset({"climatestance_gold"})
+
+
+def load_all_external(names=("semeval_climate", "gwsd"), external_dir=EXTERNAL_DIR,
+                      allow_gold_check: bool = False) -> pd.DataFrame:
+    """Concatenate several external datasets into the common schema.
+
+    Raises ValueError if a gold check file (``GOLD_CHECK_FILES``) is requested without ``allow_gold_check``.
+    """
+    gold = sorted(set(names) & GOLD_CHECK_FILES)
+    if gold and not allow_gold_check:
+        raise ValueError(
+            f"{gold} is the human gold check set for the LLM labellers (T4). Add it to training data only "
+            "after that check, with allow_gold_check=True."
+        )
     frames = [load_external(n, external_dir)[COMMON_COLUMNS] for n in names]
     return pd.concat(frames, ignore_index=True)
 

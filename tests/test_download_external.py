@@ -68,13 +68,16 @@ def _reddit(opinions):
     })
 
 
-def test_climatestance_reddit_reports_disagreements_and_empty_text():
+def test_climatestance_gold_reports_disagreements_and_empty_text():
     a1 = _reddit([1, -1, 0, 1, -1])
     a2 = _reddit([1, -1, 1, 1, -1])
-    built = dx.build_climatestance_reddit(a1, a2)
+    built = dx.build_climatestance_gold(a1, a2)
     assert built.kept["label"].tolist() == ["Favour", "Against"]
     assert set(built.kept["source_dataset"]) == {"climatestance"}
     assert list(built.kept.columns) == dx.OUTPUT_COLUMNS
+    assert set(built.kept["split"]) == {"gold_check"}  # never train / val / test
+    assert built.kept["original_label"].tolist() == ["1", "-1"]
+    assert built.kept["mapping_confidence"].tolist() == ["direct", "approximate"]
     reasons = sorted(built.excluded["reason"])
     assert reasons == ["annotator_disagreement", "duplicate_text", "empty_text"]
     disagreement = built.excluded[built.excluded["reason"] == "annotator_disagreement"].iloc[0]
@@ -83,11 +86,11 @@ def test_climatestance_reddit_reports_disagreements_and_empty_text():
     assert len(built.kept) + len(built.excluded) == len(a1)
 
 
-def test_climatestance_reddit_rejects_misaligned_annotator_files():
+def test_climatestance_gold_rejects_misaligned_annotator_files():
     a1 = _reddit([1, 0])
     a2 = _reddit([1, 0]).iloc[::-1]
     with pytest.raises(ValueError):
-        dx.build_climatestance_reddit(a1, a2)
+        dx.build_climatestance_gold(a1, a2)
 
 
 def test_climatestance_tweet_ids_map_float_codes_and_flag_missing_text():
@@ -118,6 +121,11 @@ def test_build_kaggle_maps_all_four_classes_and_validates_columns():
     assert built.excluded["reason"].tolist() == ["unknown_label"]
     with pytest.raises(ValueError, match="missing columns"):
         dx.build_kaggle(raw.rename(columns={"message": "text"}))
+
+
+def test_count_mojibake_flags_cp1252_decoded_utf8_only():
+    texts = pd.Series(["clean text…", "this is brokenâ€¦", "twiceÃ¢â‚¬Â¦", "café", "दुनिया"])
+    assert dx.count_mojibake(texts) == 2
 
 
 def test_kaggle_without_file_or_api_prints_manual_steps(tmp_path, monkeypatch, capsys):

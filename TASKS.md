@@ -63,7 +63,16 @@ Then: run `search`, open the CSV, set `keep=1` on ~50 to 70 relevant videos (Cla
 > read `comments_clean.csv` in batches of 100 and write `labels_claude.jsonl` in the same format, following
 > the guideline strictly. Finally write `scripts/aggregate_labels.py`: majority vote, flag 3-way splits,
 > compute Fleiss' kappa, pairwise Cohen's kappa and % unanimous, save `data/interim/labels_merged.csv` and
-> `results/annotation_agreement.json`. Summarise, then commit and push after my approval (code only).
+> `results/annotation_agreement.json`. Also run the human gold check: have each annotator (gemini, groq,
+> claude) label the 303 comments in `data/external/climatestance_gold.csv` with the same guideline, once in
+> the original English and once in Hindi and Bengali translation (translate them once, cache the
+> translations in `data/interim/`, and give all three annotators the same translated text). Score each
+> annotator against the human labels with `terralens.evaluate.evaluate`: accuracy, Macro F1, per-class
+> scores and confusion matrix, for English, Hindi and Bengali separately, on all 303 rows and on the 178
+> `mapping_confidence == direct` rows. Save to `results/llm_gold_check.json`. ClimateStance counts opposing
+> climate policy as Against where our guideline says None, so these scores slightly underestimate agreement;
+> say so next to the numbers. The gold comments are not train, validation or test data; after this check
+> they may be added to training data only. Summarise, then commit and push after my approval (code only).
 
 ## T5. Human check on English glosses  (~1 h of your time)
 

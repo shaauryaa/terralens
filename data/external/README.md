@@ -11,10 +11,10 @@ python scripts/download_external.py --limit 50      # dry run, writes nothing
 |------|--------|-------|
 | `semeval_climate.csv` | SemEval-2016 Task 6, target *Climate Change is a Real Concern* (`cardiffnlp/tweet_eval`, `stance_climate`) | train + validation + test combined; `split` column kept |
 | `gwsd.csv` | Global Warming Stance Dataset (Luo et al., 2020) | label = argmax of the annotator agree / neutral / disagree columns |
-| `climatestance_reddit.csv` | ClimateReddit, two human annotators (Vaid et al., 2022) | only comments both annotators agree on; the rest in `*_excluded.csv` |
+| `climatestance_gold.csv` | ClimateReddit, two human annotators (Vaid et al., 2022) | the 303 comments both annotators agree on; **gold check set for the T4 LLM labellers, not train / val / test**; the rest in `*_excluded.csv` |
 | `climatestance_reddit_pseudo.csv` | ClimateReddit, model-predicted labels | labels unreliable; do not use as gold |
 | `climatestance_tweet_ids.csv` | ClimateStance tweets | tweet IDs and labels only, no text |
-| `kaggle_climate_sentiment.csv` | Twitter Climate Change Sentiment Dataset (Kaggle) | needs `twitter_sentiment_data.csv` downloaded by hand or via the Kaggle API |
+| `kaggle_climate_sentiment.csv` | Twitter Climate Change Sentiment Dataset (Kaggle) | built from `twitter_sentiment_data.csv` (downloaded by hand or via the Kaggle API); duplicates and retweets removed |
 
 Columns: `id, text, label, source, lang` plus `source_dataset, original_id, original_label,
 original_label_name, mapping_confidence, split`. `label` is in `{Favour, Against, None}` and `lang = "en"`.

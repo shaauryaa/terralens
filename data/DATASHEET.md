@@ -33,13 +33,18 @@ Every file keeps the source label next to the TerraLens label: `source_dataset`,
 |---|---:|---:|---:|---:|---|---|
 | `semeval_climate.csv` | 564 | 335 | 26 | 203 | yes | not re-checked in T2 |
 | `gwsd.csv` | 2050 | 777 | 400 | 873 | yes | not re-checked in T2 |
-| `climatestance_reddit.csv` | 303 | 178 | 60 | 65 | yes | no licence; keep out of git |
+| `climatestance_gold.csv` | 303 | 178 | 60 | 65 | yes; **gold check set, not for training yet** | no licence; keep out of git |
 | `climatestance_reddit_pseudo.csv` | 6208 | 6032 | 176 | 0 | yes, but labels unreliable | no licence; keep out of git |
 | `climatestance_tweet_ids.csv` | 3777 | 2990 | 373 | 414 | **no** (IDs only) | no licence; IDs only |
-| `kaggle_climate_sentiment.csv` | not run yet | | | | | © original authors; keep out of git |
+| `kaggle_climate_sentiment.csv` | 38488 | 19644 | 3781 | 15063 | yes (mojibake in 6109 rows) | © original authors; keep out of git |
 
-Cross-dataset overlap (normalised exact text, reported, not removed): one comment appears in both
-`climatestance_reddit` and `climatestance_reddit_pseudo`; no other pair of built files shares a text.
+Cross-dataset overlap (normalised exact text, reported, not removed):
+- `kaggle_climate_sentiment` shares 5 texts with `climatestance_reddit_pseudo`, 1 with `climatestance_gold`
+  and 1 with `gwsd`.
+- `climatestance_gold` and `climatestance_reddit_pseudo` share 1 text.
+- No other pair of files shares a text.
+
+Remove the gold-overlapping texts from any training data used before the T4 check is done.
 
 ### ClimateStance / ClimateReddit (Vaid, Pant and Shrivastava, 2022)
 
@@ -71,8 +76,8 @@ Cross-dataset overlap (normalised exact text, reported, not removed): one commen
   - Pseudo-labelled Reddit: 1 = 6077, -1 = 185, 0 = 0.
   - Tweets: 1 = 2990, 0 = 414, -1 = 373.
 - **Kept / excluded:**
-  - `climatestance_reddit`: the two annotators agree on 303 of 329 comments (92.1%). The 26 disagreements
-    are in `climatestance_reddit_excluded.csv` (`original_label` = `a1=..|a2=..`).
+  - `climatestance_gold`: the two annotators agree on 303 of 329 comments (92.1%). The 26 disagreements
+    are in `climatestance_gold_excluded.csv` (`original_label` = `a1=..|a2=..`).
   - `climatestance_reddit_pseudo`: 54 exact duplicate texts are excluded; none had conflicting labels.
   - Tweet IDs: no duplicate IDs.
 - **Do not use the pseudo labels as gold.** The model that produced them reaches stance F1 0.343 in the
@@ -87,12 +92,36 @@ Cross-dataset overlap (normalised exact text, reported, not removed): one commen
   `python scripts/download_external.py --datasets climatestance`. The raw TSVs are cached in
   `data/external/climatestance_raw/`.
 
+### Human gold check set for the LLM labellers (`climatestance_gold.csv`)
+
+The 303 ClimateStance Reddit comments that both human annotators agreed on: Favour 178, Against 60,
+None 65. By mapping confidence, 178 are `direct` and 125 `approximate`. They are kept apart, with
+`split = gold_check`.
+
+- **Purpose:** in T4, each LLM labeller (Gemini, Groq `gpt-oss-120b`, Claude) labels these comments with
+  the TerraLens guideline twice: once in the original English, and once in Hindi and Bengali translation.
+  We report each labeller's accuracy and Macro F1 against the human labels, in English and per
+  translation language. This tells us how far to trust the LLM labels on the YouTube comments, and how much
+  is lost when the text is not English.
+- **Not in train, validation or test.** `terralens.data.load_all_external` refuses this file unless
+  `allow_gold_check=True` is passed. After the T4 check, it may be added to **training** data only (never
+  validation or test, which are real YouTube comments only).
+- **Expected under-estimate.** The human labels follow ClimateStance, not our guideline:
+  - ClimateStance counts **opposition to climate policy as Against**; our guideline says **None** when
+    seriousness is not disputed.
+  - ClimateStance puts sarcasm under Ambiguous; we label sarcasm by its intended meaning.
+
+  A labeller that follows our guideline correctly will therefore disagree with some gold Against and None
+  labels, so this check slightly **underestimates** agreement. Report scores on the 178 `direct` rows next
+  to the full set, and read the remaining disagreements with that in mind.
+- **Overlap:** one gold comment also appears in `kaggle_climate_sentiment` and one in
+  `climatestance_reddit_pseudo` (see above).
+
 ### Twitter Climate Change Sentiment Dataset (Kaggle, Edward Qian)
 
-**Not run yet:** the Kaggle API is not configured on this machine, and the file has not been downloaded by
-hand. The details below are from the Kaggle dataset metadata (`edqian/twitter-climate-change-sentiment-dataset`,
-version 1, 2019-11-13). File names and columns could not be checked without the file. The script expects
-`twitter_sentiment_data.csv` with `sentiment, message, tweetid` and stops with an error if the columns differ.
+Downloaded by hand from Kaggle (`edqian/twitter-climate-change-sentiment-dataset`, version 1, 2019-11-13)
+as `data/external/twitter_sentiment_data.csv`. It has 43,943 rows with columns `sentiment, message,
+tweetid`, no empty messages and no duplicate tweet IDs. The raw file is read, never changed.
 
 - **Content:** 43,943 tweets about climate change, 27 Apr 2015 to 21 Feb 2018. Each tweet was labelled by
   3 reviewers, and only tweets all 3 agreed on were kept.
@@ -106,13 +135,35 @@ version 1, 2019-11-13). File names and columns could not be checked without the 
 | `0` Neutral: "neither supports nor refutes the belief of man-made climate change" | None | direct | no position |
 | `2` News: "links to factual news about climate change" | None | uncertain | our guideline makes neutral facts None, but headlines about harms can imply Favour |
 
+- **Counts before mapping (all 43,943 rows):** Pro 22,962, News 9,276, Neutral 7,715, Anti 3,990.
+- **Excluded (5,455 rows, in `kaggle_climate_sentiment_excluded.csv`):**
+
+  | Reason | Anti | Neutral | News | Pro | Total |
+  |---|---:|---:|---:|---:|---:|
+  | `duplicate_text`: same text and label as an earlier row (mostly retweets) | 198 | 352 | 1422 | 3191 | 5163 |
+  | `duplicate_conflicting_labels`: same text, different labels, all copies dropped | 9 | 37 | 112 | 124 | 282 |
+  | `empty_text`: only @mentions and links | 2 | 5 | 0 | 3 | 10 |
+
+  Duplicates are found after `clean_text`, lower-casing and removing a leading "RT", so a retweet counts
+  as a duplicate of the original tweet.
+- **Counts after mapping (38,488 rows):**
+  - Favour 19,644 (51.0%), all from Pro.
+  - Against 3,781 (9.8%), all from Anti.
+  - None 15,063 (39.1%): 7,321 Neutral and 7,742 News.
+  - By confidence: 23,425 approximate, 7,742 uncertain (News), 7,321 direct.
+- **Text quality:** the text is kept as published, including @handles, links and "RT" prefixes (54% of
+  kept rows start with "RT").
+- **Mojibake:** 6,109 kept rows contain UTF-8 that was decoded as cp1252 (e.g. an ellipsis shown as `â€¦`).
+  Re-encoding fixes most rows but garbles some, so the text is left unchanged. Repair it (e.g. with `ftfy`)
+  during cleaning, before translation.
+
 - **Licence:** the Kaggle licence field says "Data files © Original Authors", which is not an open licence.
   The file contains full tweet text with @handles. X/Twitter developer terms allow sharing tweet IDs, not
   text.
 - **Attribution:** Edward Qian (Kaggle). The collection was funded by a Canada Foundation for Innovation JELF
   grant to Chris Bauch, University of Waterloo.
 - **Not redistributed:** the data stays out of git.
-- **To add it:**
+- **To rebuild:**
   1. Sign in to Kaggle and download the dataset from
      https://www.kaggle.com/datasets/edqian/twitter-climate-change-sentiment-dataset
   2. Unzip it and put `twitter_sentiment_data.csv` in `data/external/`.

@@ -3,19 +3,16 @@
   "script": "scripts/download_external.py",
   "config": {
     "datasets": [
-      "semeval",
-      "gwsd",
-      "climatestance",
-      "kaggle"
+      "climatestance"
     ],
     "climatestance_repo": "roopalv54/finegrained-climate-change-social-media",
     "climatestance_commit": "fa1023b459eef6761eeb77b682c6fa4666e3edfd",
     "kaggle_ref": "edqian/twitter-climate-change-sentiment-dataset"
   },
   "seed": 42,
-  "timestamp": "2026-11-18T01:13:27+00:00",
+  "timestamp": "2026-11-18T01:35:53+00:00",
   "datasets": {
-    "climatestance_reddit": {
+    "climatestance_gold": {
       "status": "built",
       "source_dataset": "climatestance",
       "rows_kept": 303,
@@ -50,7 +47,8 @@
       },
       "has_text": true,
       "notes": [
-        "annotators agree on 303/329 comments (92.1%)"
+        "annotators agree on 303/329 comments (92.1%)",
+        "gold check set for the T4 LLM labellers; not in train/val/test; training only after T4"
       ],
       "licence": {
         "licence": "none stated: no LICENSE file and an empty README in the GitHub repo (GitHub API license=null), so all rights are reserved by default",
@@ -58,7 +56,7 @@
         "restrictions": "tweets are released as IDs only, 'in accordance with the Twitter Terms of Service'; Reddit comments are user content under Reddit's terms",
         "redistribute_text": false
       },
-      "updated": "2026-11-18T01:13:27+00:00"
+      "updated": "2026-11-18T01:35:53+00:00"
     },
     "climatestance_reddit_pseudo": {
       "status": "built",
@@ -89,7 +87,7 @@
         "restrictions": "tweets are released as IDs only, 'in accordance with the Twitter Terms of Service'; Reddit comments are user content under Reddit's terms",
         "redistribute_text": false
       },
-      "updated": "2026-11-18T01:13:27+00:00"
+      "updated": "2026-11-18T01:35:53+00:00"
     },
     "climatestance_tweet_ids": {
       "status": "built",
@@ -120,7 +118,7 @@
         "restrictions": "tweets are released as IDs only, 'in accordance with the Twitter Terms of Service'; Reddit comments are user content under Reddit's terms",
         "redistribute_text": false
       },
-      "updated": "2026-11-18T01:13:27+00:00"
+      "updated": "2026-11-18T01:35:53+00:00"
     },
     "gwsd": {
       "status": "built",
@@ -151,15 +149,42 @@
       "updated": "2026-11-18T01:13:27+00:00"
     },
     "kaggle_climate_sentiment": {
-      "status": "not run yet: raw file not downloaded (Kaggle API not configured)",
+      "status": "built",
       "source_dataset": "kaggle_climate_sentiment",
+      "rows_kept": 38488,
+      "counts_before_mapping": {
+        "-1": 3990,
+        "0": 7715,
+        "1": 22962,
+        "2": 9276
+      },
+      "counts_after_mapping": {
+        "Favour": 19644,
+        "Against": 3781,
+        "None": 15063
+      },
+      "after_mapping_by_confidence": {
+        "approximate": 23425,
+        "direct": 7321,
+        "uncertain": 7742
+      },
+      "excluded": {
+        "duplicate_conflicting_labels": 282,
+        "duplicate_text": 5163,
+        "empty_text": 10
+      },
+      "has_text": true,
+      "notes": [
+        "text holds @handles and URLs as published; clean before use",
+        "6109 kept rows contain mojibake (UTF-8 text decoded as cp1252, e.g. an ellipsis shown as three odd characters); text left as published, repair during cleaning"
+      ],
       "licence": {
         "licence": "Kaggle licence field: 'Data files © Original Authors' (not an open licence)",
         "attribution": "Edward Qian, Kaggle; collection funded by a Canada Foundation for Innovation JELF grant to Chris Bauch, University of Waterloo",
         "restrictions": "contains full tweet text; X/Twitter developer terms allow sharing tweet IDs, not text",
         "redistribute_text": false
       },
-      "updated": "2026-11-18T01:13:27+00:00"
+      "updated": "2026-11-18T01:34:30+00:00"
     },
     "semeval_climate": {
       "status": "built",
@@ -189,11 +214,15 @@
     }
   },
   "cross_dataset_text_overlap": {
-    "climatestance_reddit|climatestance_reddit_pseudo": 1,
-    "climatestance_reddit|gwsd": 0,
-    "climatestance_reddit|semeval_climate": 0,
+    "climatestance_gold|climatestance_reddit_pseudo": 1,
+    "climatestance_gold|gwsd": 0,
+    "climatestance_gold|kaggle_climate_sentiment": 1,
+    "climatestance_gold|semeval_climate": 0,
     "climatestance_reddit_pseudo|gwsd": 0,
+    "climatestance_reddit_pseudo|kaggle_climate_sentiment": 5,
     "climatestance_reddit_pseudo|semeval_climate": 0,
-    "gwsd|semeval_climate": 0
+    "gwsd|kaggle_climate_sentiment": 1,
+    "gwsd|semeval_climate": 0,
+    "kaggle_climate_sentiment|semeval_climate": 0
   }
 }
