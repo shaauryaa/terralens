@@ -10,6 +10,20 @@ settings:
   published_after: "2019-01-01T00:00:00Z"
   region_code: IN                  # Bengali queries also run with BD (see below)
 
+# `collect_youtube.py screen`: automatic keep decision (Gemini + rule-based language check).
+screening:
+  screener: claude                 # claude: Claude Code writes decision files; gemini: Gemini API
+  min_rule_indic_share_for_llm: 0.2   # below this rule-based Indic share -> rule_no_indic, no LLM call
+  claude_batch_size: 20            # videos per Claude decision file
+  model: gemini-3.8-flash          # (gemini screener only) gemini-2.5-flash is closed to new API keys
+  batch_size: 5                    # (gemini screener only) 10 caused frequent 503/504 timeouts; ~20 requests/day free
+  sample_comments: 20              # top-level comments sampled per video (1 YouTube unit each)
+  min_sample_comments: 5           # fewer -> dropped as too_few_comments
+  max_per_channel: 3
+  target_per_language: [30, 35]    # aim, not quota: never keep an irrelevant video to hit it
+  min_sceptic_share: 0.15
+  min_seconds_between_calls: 7     # Gemini free tier allows ~10 requests per minute
+
 hindi:
   relevance_language: hi
   queries:
