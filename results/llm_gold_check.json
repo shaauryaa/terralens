@@ -1,0 +1,194 @@
+{
+  "experiment_id": "llm_gold_check",
+  "script": "scripts/aggregate_labels.py",
+  "seed": 42,
+  "timestamp": "2026-11-18T02:49:52+00:00",
+  "gold": "data/external/climatestance_gold.csv (303 Reddit comments both human annotators agreed on)",
+  "note": "ClimateStance labels opposing climate policy as Against and sarcasm as ambiguous (None); our guideline says None for policy opposition and labels sarcasm by meaning, so these scores slightly underestimate agreement with our guideline",
+  "annotators": {
+    "claude": {
+      "status": "not scored: 503 records lack required fields ['gloss', 'reason']"
+    },
+    "gemini": {
+      "model": "gemini-3.5-flash-lite",
+      "en_all": {
+        "n": 303,
+        "accuracy": 0.6766,
+        "macro_f1": 0.641,
+        "per_class_f1": {
+          "Favour": 0.7756,
+          "Against": 0.6573,
+          "None": 0.4901
+        },
+        "confusion_matrix": {
+          "rows_gold_cols_pred": [
+            "Favour",
+            "Against",
+            "None"
+          ],
+          "matrix": [
+            [
+              121,
+              15,
+              42
+            ],
+            [
+              6,
+              47,
+              7
+            ],
+            [
+              7,
+              21,
+              37
+            ]
+          ]
+        },
+        "n_expected": 303,
+        "missing": 0
+      },
+      "en_direct": {
+        "n": 178,
+        "accuracy": 0.6798,
+        "confusion_matrix": {
+          "rows_gold_cols_pred": [
+            "Favour",
+            "Against",
+            "None"
+          ],
+          "matrix": [
+            [
+              121,
+              15,
+              42
+            ],
+            [
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0
+            ]
+          ]
+        },
+        "n_expected": 178,
+        "missing": 0,
+        "note": "all direct rows are human Favour; accuracy = recall of Favour"
+      },
+      "en_translation_subset": {
+        "n": 100,
+        "accuracy": 0.76,
+        "macro_f1": 0.7396,
+        "per_class_f1": {
+          "Favour": 0.8257,
+          "Against": 0.7895,
+          "None": 0.6038
+        },
+        "confusion_matrix": {
+          "rows_gold_cols_pred": [
+            "Favour",
+            "Against",
+            "None"
+          ],
+          "matrix": [
+            [
+              45,
+              0,
+              14
+            ],
+            [
+              3,
+              15,
+              2
+            ],
+            [
+              2,
+              3,
+              16
+            ]
+          ]
+        },
+        "n_expected": 100,
+        "missing": 0
+      },
+      "hi": {
+        "n": 100,
+        "accuracy": 0.74,
+        "macro_f1": 0.7087,
+        "per_class_f1": {
+          "Favour": 0.8224,
+          "Against": 0.7,
+          "None": 0.6038
+        },
+        "confusion_matrix": {
+          "rows_gold_cols_pred": [
+            "Favour",
+            "Against",
+            "None"
+          ],
+          "matrix": [
+            [
+              44,
+              2,
+              13
+            ],
+            [
+              3,
+              14,
+              3
+            ],
+            [
+              1,
+              4,
+              16
+            ]
+          ]
+        },
+        "n_expected": 100,
+        "missing": 0
+      },
+      "bn": {
+        "n": 100,
+        "accuracy": 0.71,
+        "macro_f1": 0.6721,
+        "per_class_f1": {
+          "Favour": 0.8113,
+          "Against": 0.6667,
+          "None": 0.5385
+        },
+        "confusion_matrix": {
+          "rows_gold_cols_pred": [
+            "Favour",
+            "Against",
+            "None"
+          ],
+          "matrix": [
+            [
+              43,
+              3,
+              13
+            ],
+            [
+              2,
+              14,
+              4
+            ],
+            [
+              2,
+              5,
+              14
+            ]
+          ]
+        },
+        "n_expected": 100,
+        "missing": 0
+      }
+    },
+    "gptoss": {
+      "status": "no gold labels yet"
+    }
+  }
+}

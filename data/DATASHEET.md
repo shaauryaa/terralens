@@ -55,6 +55,45 @@ No author names or channel IDs are stored; @handles become `@user` and e-mail ad
 Fewer than 5,000 comments remain, so no labelling sample was drawn (`comments_to_label.csv` is written only
 above 5,000); all of `comments_clean.csv` goes to labelling.
 
+### Labelling (T4): two full annotators and an adjudicator
+
+**Items.** `scripts/label_llm.py prepare` writes the shared item file `data/interim/labelling_items.csv`
+with 3,981 items:
+- the 3,798 cleaned comments;
+- the 183 `other_language` comments with 3 or more tokens, marked `lang_uncertain = 1` (see the
+  limitation below).
+
+**Annotators** (all follow `annotation/guidelines.md`):
+
+| Annotator | Model | Role | Input per request | Output |
+|---|---|---|---|---|
+| Claude | Claude Code session (Sonnet), separate from the development session | full annotator | batches of 100, full guideline | label, confidence, tags, English gloss, reason |
+| Gemini | `gemini-3.5-flash-lite` (free tier: 15 requests/min, 500/day) | full annotator | 25 comments, compact guideline (`annotation/prompts/compact_system.md`: rules + 10 examples) | label, confidence, tags |
+| gpt-oss | `openai/gpt-oss-120b` on Groq (reasoning effort medium) | adjudicator only | 50 comments, compact guideline | label, confidence, tags |
+
+- For `lang_uncertain` items every annotator also gives the language (`hi`, `bn` or `other`).
+- **Why gpt-oss is only an adjudicator.** On Groq's free tier (8,000 tokens/min, and a 200,000
+  tokens/day limit that the docs list but may not apply to the free plan), it would need about 4 days for
+  every comment. With reasoning effort `low` it labelled all 50 test comments None, so it runs at `medium`.
+
+**Final label** (`scripts/aggregate_labels.py`):
+- If Claude and Gemini agree, their label is final.
+- If they disagree, gpt-oss decides when its label matches one of theirs.
+- Otherwise it is a 3-way split, flagged for human review (`review_flag = 1`, used in T5).
+- `lang_uncertain` items are kept only if at least 2 annotators say Hindi or Bengali.
+
+**gpt-oss workload**, in priority order, until its daily limit:
+1. the disagreements;
+2. the 303 English gold rows;
+3. a random sample of 300 comments (seed 42), for Fleiss' kappa across all three annotators.
+
+**Gold check.** All annotators also label the human gold set (`data/external/climatestance_gold.csv`, 303
+English Reddit comments). A stratified 100-row subset (59 Favour, 20 Against, 21 None) was translated
+once into Hindi and Bengali; the translations were written by Claude in the development session and are
+cached in `data/interim/gold_translations.csv`. Accuracy and Macro F1 against the human labels are in
+`results/llm_gold_check.json`. Agreement between the annotators is in `results/annotation_agreement.json`.
+Results not run yet at the time of writing.
+
 **Limitation (romanised text).** The keyword rule cannot know every romanised spelling. 183 of the 493
 "other_language" comments have 3 or more tokens. A manual look suggests many of them are romanised Hindi or
 Bengali with unlisted spellings (e.g. "Modi chor he", "2 bochor por abar dekhlam"). These comments are in

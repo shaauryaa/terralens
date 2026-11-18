@@ -54,25 +54,41 @@ Then: run `search`, open the CSV, set `keep=1` on ~50 to 70 relevant videos (Cla
 > `data/interim/comments_clean.csv` with id, video_id, text, lang, script. Print a filter report (how many
 > rows each step removed). Add tests. Summarise, then commit and push after my approval.
 
-## T4. Label with three LLM annotators  (~1 to 2 h, mostly waiting)
+## T4. Label with two full annotators and an adjudicator  (~1 day, mostly waiting)
 
-> Write `scripts/label_llm.py` with annotators `gemini` (GEMINI_API_KEY) and `groq` (`openai/gpt-oss-120b`
-> on Groq's free tier; GROQ_API_KEY), using `annotation/guidelines.md` as the system prompt and the JSON
-> output format in it. Batch 25 comments per request, retry on rate limits, resume from partial output,
-> write `data/interim/labels_<annotator>.jsonl`. Then label the same file yourself as annotator `claude`:
-> read `comments_clean.csv` in batches of 100 and write `labels_claude.jsonl` in the same format, following
-> the guideline strictly. Finally write `scripts/aggregate_labels.py`: majority vote, flag 3-way splits,
-> compute Fleiss' kappa, pairwise Cohen's kappa and % unanimous, save `data/interim/labels_merged.csv` and
-> `results/annotation_agreement.json`. Also run the human gold check: have each annotator (gemini, groq,
-> claude) label the 303 comments in `data/external/climatestance_gold.csv` with the same guideline, once in
-> the original English and once in Hindi and Bengali translation (translate them once, cache the
-> translations in `data/interim/`, and give all three annotators the same translated text). Score each
-> annotator against the human labels with `terralens.evaluate.evaluate`: accuracy, Macro F1, per-class
-> scores and confusion matrix, for English, Hindi and Bengali separately, on all 303 rows and on the 178
-> `mapping_confidence == direct` rows. Save to `results/llm_gold_check.json`. ClimateStance counts opposing
-> climate policy as Against where our guideline says None, so these scores slightly underestimate agreement;
-> say so next to the numbers. The gold comments are not train, validation or test data; after this check
-> they may be added to training data only. Summarise, then commit and push after my approval (code only).
+Design: Claude and Gemini label everything; gpt-oss-120b adjudicates their disagreements.
+
+> Write `scripts/label_llm.py`: retry on rate limits, validate JSON, resume from partial output, log failures,
+> never drop rows silently. System prompt: compact guideline (rules + 10 examples,
+> `annotation/prompts/compact_system.md`); API annotators return only `{"id","label","confidence","tags"}`,
+> plus `"lang": "hi"|"bn"|"other"` for `lang_uncertain` rows. `prepare` writes the shared item files:
+> `data/interim/labelling_items.csv` (the 3,798 rows of `comments_clean.csv` plus the 183 other_language
+> comments with 3+ words, `lang_uncertain=1`) and `data/interim/gold_items.csv` (303 English gold rows of
+> `data/external/climatestance_gold.csv` + a stratified 100-row subset translated once into Hindi and
+> Bengali, cached in `data/interim/gold_translations.csv`).
+>
+> Annotators:
+> - **Claude** labels everything in a separate Claude Code session (Sonnet), following
+>   `annotation/prompts/claude_session.md`: `labels_claude.jsonl` and `labels_claude_gold.jsonl`, with an
+>   English gloss and a short reason.
+> - **Gemini** (`gemini-3.5-flash-lite`, 500 requests/day, 25 comments per request) labels the gold items and
+>   all labelling items: `labels_gemini.jsonl`, `labels_gemini_gold.jsonl`.
+> - **gpt-oss-120b** on Groq (reasoning medium, 50 comments per request) is adjudicator only. When both full
+>   label files are complete, `label_llm.py adjudicate` runs it in priority order: (1) Claude/Gemini
+>   disagreements, (2) the 303 English gold rows, (3) if budget remains, a random 300-comment sample
+>   (seed 42); it stops at the daily limit and resumes the next day.
+>
+> Write `scripts/aggregate_labels.py`: Claude+Gemini agree -> that label; disagree -> gpt-oss decides if it
+> matches one of them; 3-way split -> `review_flag=1`. `lang_uncertain` rows are kept only if at least 2
+> annotators say hi or bn. Report Cohen's kappa Claude vs Gemini (overall, per language, per script) as the
+> main agreement number, % agreement, how many went to gpt-oss, how many 3-way splits, Fleiss' kappa on the
+> 300 sample, and the label distribution per language. Gold check: accuracy, Macro F1, per-class F1 and
+> confusion matrix vs the human labels for each annotator, English (all 303 and the 178 `direct` rows) and
+> translated, in `results/llm_gold_check.json`. ClimateStance counts opposing climate policy as Against
+> where our guideline says None, so these scores slightly underestimate agreement; say so next to the
+> numbers. The gold comments are not train, validation or test data; after this check they may be added to
+> training data only. Save `data/interim/labels_merged.csv` and `results/annotation_agreement.json`.
+> Summarise, then commit and push after my approval (code and results JSON only).
 
 ## T5. Human check on English glosses  (~1 h of your time)
 
