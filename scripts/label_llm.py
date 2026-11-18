@@ -84,7 +84,8 @@ class Annotator:
 
 ANNOTATORS = {
     "gemini": Annotator("gemini", "gemini", "gemini-3.5-flash-lite", 25, 4.2, {}),
-    "gptoss": Annotator("gptoss", "groq", "openai/gpt-oss-120b", 50, 2.0, {"reasoning_effort": "medium"}),
+    "gptoss": Annotator("gptoss", "groq", "openai/gpt-oss-120b", 50, 2.0,
+                        {"reasoning_effort": "medium", "max_completion_tokens": 6000}),
 }
 
 
@@ -238,7 +239,8 @@ def call_groq(ann: Annotator, key: str, system: str, message: str) -> tuple[str,
         if re.search(r"per day|\(TPD\)|\(RPD\)", msg, re.IGNORECASE):
             raise DailyLimitReached(f"Groq daily limit: {msg[:200]}")
         raise RateLimited(float(r.headers.get("retry-after", 10)) + 1)
-    if r.status_code == 413 or "too large" in r.text.lower():
+    # Too large, or the answer was cut off / not valid JSON (long reasoning on hard items): split the batch.
+    if r.status_code == 413 or "too large" in r.text.lower() or "json_validate_failed" in r.text:
         raise RequestTooLarge(r.text[:200])
     if r.status_code >= 500:
         raise TransientError(f"HTTP {r.status_code}")
@@ -246,6 +248,8 @@ def call_groq(ann: Annotator, key: str, system: str, message: str) -> tuple[str,
         raise RuntimeError(f"Groq HTTP {r.status_code}: {r.text[:300]}")
     j = r.json()
     usage = j.get("usage", {})
+    if j["choices"][0].get("finish_reason") == "length":
+        raise RequestTooLarge("output cut off (finish_reason=length)")
     return j["choices"][0]["message"]["content"], {"in": usage.get("prompt_tokens"),
                                                    "out": usage.get("completion_tokens"),
                                                    "finish": j["choices"][0].get("finish_reason")}
@@ -375,11 +379,13 @@ def label_items(items: pd.DataFrame, ann: Annotator, out: Path, set_name: str, m
             queue.insert(0, batch)
             stats["stopped"] = str(err)
             break
-        except RequestTooLarge:
-            half = len(batch) // 2 or 1
-            queue[:0] = [batch.iloc[:half], batch.iloc[half:]] if len(batch) > 1 else []
-            append_jsonl(req_log, [{"ts": now(), "set": set_name, "n": len(batch), "status": "too_large_split"}])
-            continue
+        except RequestTooLarge as err:
+            if len(batch) > 1:  # split and retry both halves (not counted as an attempt)
+                half = len(batch) // 2
+                queue[:0] = [batch.iloc[:half], batch.iloc[half:]]
+                append_jsonl(req_log, [{"ts": now(), "set": set_name, "n": len(batch), "status": "too_large_split"}])
+                continue
+            text, usage, status = "", {}, f"error: single item too large or cut off: {err}"
         except (TransientError, requests.RequestException) as err:
             text, usage, status = "", {}, f"error: {err}"
         except RuntimeError as err:
@@ -471,27 +477,116 @@ def cmd_adjudicate(args) -> None:
     key = load_env()["GROQ_API_KEY"]
     budget = args.max_requests
     for set_name, part in queue:
+        if set_name not in args.sets:
+            continue
         stats = label_items(part, ann, out_path("gptoss", set_name), set_name, budget, key)
         if budget is not None:
             budget -= stats["requests"]
-        if stats["stopped"] and not stats["stopped"].startswith("all"):
-            print(f"Stopped during {set_name}: {stats['stopped']}. Re-run tomorrow to resume.")
+        if stats["stopped"]:
+            hint = "Re-run tomorrow to resume." if "daily" in stats["stopped"].lower() else "Re-run to resume."
+            print(f"Stopped during {set_name}: {stats['stopped']}. {hint}")
             return
+
+
+# ============================================================================================ glosses
+
+REVIEW_SIZE = 150
+MERGED_CSV = INTERIM / "labels_merged.csv"
+GLOSS_JSONL = INTERIM / "glosses_gemini.jsonl"
+GLOSS_SYSTEM = (
+    "Translate each YouTube comment (Hindi, Bengali, English; native script, romanised or code-mixed) into "
+    "faithful, plain English. Keep sarcasm, negation and insults; do not explain or summarise. "
+    'Input: a JSON list of {"id", "text"}. Output ONLY a JSON object '
+    '{"glosses": [{"id": "<id>", "gloss": "<English>"}, ...]} with one entry per input id.'
+)
+
+
+def review_selection(merged: pd.DataFrame, n: int = REVIEW_SIZE, seed: int = SEED) -> pd.DataFrame:
+    """All kept 3-way splits plus a random n of the other kept, labelled items (seed 42). T5 reuses this."""
+    kept = merged[merged["keep"].astype(str) == "1"]
+    flag = kept["review_flag"].astype(str) == "1"
+    splits = kept[flag].assign(review_reason="three_way_split")
+    labelled = kept["final_label"].fillna("").astype(str) != ""
+    pool = kept[~flag & labelled]
+    sample = pool.sample(min(n, len(pool)), random_state=seed).assign(review_reason="random_sample")
+    return pd.concat([splits, sample])
+
+
+def validate_glosses(text: str, idmap: dict) -> tuple[dict, dict]:
+    """({real_id: {"id", "gloss"}}, {real_id: error}) for one gloss response."""
+    try:
+        entries = json.loads(text)["glosses"]
+    except (ValueError, KeyError, TypeError) as err:
+        return {}, {rid: f"unparseable response: {err}" for rid in idmap.values()}
+    valid = {}
+    for e in entries if isinstance(entries, list) else []:
+        if isinstance(e, dict) and str(e.get("id")) in idmap and str(e.get("gloss", "")).strip():
+            rid = idmap[str(e["id"])]
+            valid[rid] = {"id": rid, "gloss": str(e["gloss"]).strip()}
+    return valid, {rid: "missing gloss" for rid in idmap.values() if rid not in valid}
+
+
+def cmd_gloss(args) -> None:
+    merged = pd.read_csv(MERGED_CSV, dtype=str, keep_default_na=False)
+    sel = review_selection(merged, args.review_size)
+    print(f"gloss items: {sel['review_reason'].value_counts().to_dict()}")
+    ann = ANNOTATORS["gemini"]
+    key = load_env()["GEMINI_API_KEY"]
+    done = {r["id"] for r in read_jsonl(GLOSS_JSONL) if r.get("gloss")}
+    todo = sel[~sel["id"].isin(done)].assign(lang_check=False)
+    requests_made = 0
+    for start in range(0, len(todo), ann.batch_size):
+        message, idmap = user_message(todo.iloc[start:start + ann.batch_size])
+        attempt = 0
+        while idmap and attempt < MAX_ATTEMPTS:
+            if args.max_requests is not None and requests_made >= args.max_requests:
+                break
+            time.sleep(ann.min_interval)
+            requests_made += 1
+            try:
+                text, _ = call_gemini(ann, key, GLOSS_SYSTEM, message)
+            except RateLimited as err:
+                time.sleep(err.wait)
+                continue
+            except DailyLimitReached as err:
+                print(f"stopped: {err}")
+                return
+            except (TransientError, requests.RequestException) as err:  # 5xx / network: back off, retry
+                attempt += 1
+                print(f"  {err}; retrying", flush=True)
+                time.sleep(10 * attempt)
+                continue
+            attempt += 1
+            valid, errors = validate_glosses(text, idmap)
+            append_jsonl(GLOSS_JSONL, [{**v, "annotator": "gemini", "model": ann.model, "ts": now()}
+                                       for v in valid.values()])
+            idmap = {k: v for k, v in idmap.items() if v in errors}
+            message = json.dumps([m for m in json.loads(message) if m["id"] in idmap], ensure_ascii=False)
+        print(f"  {min(start + ann.batch_size, len(todo))}/{len(todo)} sent", flush=True)
+    have = {r["id"] for r in read_jsonl(GLOSS_JSONL) if r.get("gloss")}
+    missing = sorted(set(sel["id"]) - have)
+    print(f"glosses: {len(sel) - len(missing)}/{len(sel)} done -> {rel(GLOSS_JSONL)}"
+          + (f"; missing {missing[:5]}" if missing else ""))
 
 
 # ============================================================================================ validate
 
 
-def validate_file(path: Path, expected_ids: set[str], lang_check_ids: set[str], need_gloss: bool = False) -> dict:
+def validate_file(path: Path, expected_ids: set[str], lang_check_ids: set[str]) -> dict:
+    """Required per record: id, label, confidence, tags (a list), and lang for lang_check items.
+
+    Annotator, model, set and timestamp are not required per record: they come from the file name and the
+    run. gloss / reason are optional extras.
+    """
     recs = read_jsonl(path)
     ids = [r.get("id") for r in recs]
     bad = []
     for r in recs:
         if r.get("label") not in LABELS or str(r.get("confidence", "")).lower() not in CONFIDENCES:
             bad.append(r.get("id"))
-        elif r.get("id") in lang_check_ids and r.get("lang") not in LANG_CHECK:
+        elif not isinstance(r.get("tags"), list):
             bad.append(r.get("id"))
-        elif need_gloss and not (r.get("gloss") and r.get("reason")):
+        elif r.get("id") in lang_check_ids and r.get("lang") not in LANG_CHECK:
             bad.append(r.get("id"))
     got = {r["id"] for r in recs if r.get("id") not in bad}
     return {"file": rel(path), "lines": len(recs), "duplicate_ids": len(ids) - len(set(ids)),
@@ -501,10 +596,9 @@ def validate_file(path: Path, expected_ids: set[str], lang_check_ids: set[str], 
 
 def cmd_validate(args) -> None:
     items, gold = load_items("main"), load_items("gold")
-    need = args.annotator == "claude"
     for set_name, frame in (("main", items), ("gold", gold)):
         path = out_path(args.annotator, set_name)
-        report = validate_file(path, set(frame["id"]), set(frame.loc[frame["lang_check"], "id"]), need)
+        report = validate_file(path, set(frame["id"]), set(frame.loc[frame["lang_check"], "id"]))
         print(json.dumps(report, ensure_ascii=False))
 
 
@@ -519,6 +613,11 @@ def parse_args(argv=None):
     r.add_argument("--limit", type=int, default=None, help="dry run on the first N items (*.dryrun.jsonl)")
     a = sub.add_parser("adjudicate", help="gpt-oss on disagreements, English gold, then a 300 sample")
     a.add_argument("--max-requests", type=int, default=None)
+    a.add_argument("--sets", nargs="+", default=["disagreement", "gold_en", "sample"],
+                   choices=["disagreement", "gold_en", "sample"], help="parts to run, in priority order")
+    gl = sub.add_parser("gloss", help="Gemini English glosses for the 3-way splits and the review sample")
+    gl.add_argument("--review-size", type=int, default=150)
+    gl.add_argument("--max-requests", type=int, default=None)
     v = sub.add_parser("validate", help="check an annotator's label files")
     v.add_argument("--annotator", required=True)
     return p.parse_args(argv)
@@ -526,7 +625,8 @@ def parse_args(argv=None):
 
 def main(argv=None) -> None:
     args = parse_args(argv)
-    {"prepare": cmd_prepare, "run": cmd_run, "adjudicate": cmd_adjudicate, "validate": cmd_validate}[args.cmd](args)
+    {"prepare": cmd_prepare, "run": cmd_run, "adjudicate": cmd_adjudicate, "gloss": cmd_gloss,
+     "validate": cmd_validate}[args.cmd](args)
 
 
 if __name__ == "__main__":

@@ -154,3 +154,34 @@ def test_adjudication_queue_priority_and_requires_complete_labels():
     assert len(q[2][1]) == 2 and not set(q[2][1]["id"]) & {"c1", "c3"}
     with pytest.raises(SystemExit):
         ll.adjudication_queue(it, claude.head(3), gemini, gold)
+
+
+def test_validate_file_needs_no_gloss_but_needs_lang(tmp_path):
+    p = tmp_path / "labels_claude.jsonl"
+    p.write_text('{"id": "a", "label": "None", "confidence": "high", "tags": []}\n'
+                 '{"id": "b", "label": "None", "confidence": "high", "tags": []}\n', encoding="utf-8")
+    rep = ll.validate_file(p, {"a", "b", "c"}, lang_check_ids={"b"})
+    assert rep["invalid"] == 1 and rep["missing"] == 2
+
+
+def test_review_selection_takes_all_splits_plus_seeded_sample():
+    m = pd.DataFrame({"id": [f"i{k}" for k in range(20)], "keep": ["1"] * 19 + ["0"],
+                      "review_flag": ["1", "1"] + ["0"] * 18, "final_label": ["", ""] + ["None"] * 17 + [""]})
+    sel = ll.review_selection(m, n=5)
+    assert sel["review_reason"].value_counts().to_dict() == {"random_sample": 5, "three_way_split": 2}
+    assert "i19" not in set(sel["id"])
+    assert sel["id"].tolist() == ll.review_selection(m, n=5)["id"].tolist()
+
+
+def test_validate_glosses():
+    valid, errors = ll.validate_glosses('{"glosses": [{"id": "1", "gloss": "It is hot"}, {"id": "2", "gloss": " "}]}',
+                                        {"1": "a", "2": "b"})
+    assert valid == {"a": {"id": "a", "gloss": "It is hot"}} and errors == {"b": "missing gloss"}
+
+
+def test_single_item_too_large_is_logged_not_dropped(tmp_path):
+    out = tmp_path / "labels_fake.jsonl"
+    call, calls = fake_call_factory([lambda b: ll.RequestTooLarge("cut off")])
+    stats = ll.label_items(items(1), ANN, out, "main", None, "k", call=call, sleep=lambda s: None)
+    assert stats["failed"] == 1 and stats["remaining"] == 1
+    assert [f["id"] for f in ll.read_jsonl(tmp_path / "labels_fake_failures.jsonl")] == ["c0"]

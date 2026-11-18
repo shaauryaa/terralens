@@ -67,11 +67,18 @@ with 3,981 items:
 
 | Annotator | Model | Role | Input per request | Output |
 |---|---|---|---|---|
-| Claude | Claude Code session (Sonnet), separate from the development session | full annotator | batches of 100, full guideline | label, confidence, tags, English gloss, reason |
+| Claude | Claude Code session (Sonnet), separate from the development session | full annotator | batches of 100, full guideline | label, confidence, tags |
 | Gemini | `gemini-3.5-flash-lite` (free tier: 15 requests/min, 500/day) | full annotator | 25 comments, compact guideline (`annotation/prompts/compact_system.md`: rules + 10 examples) | label, confidence, tags |
 | gpt-oss | `openai/gpt-oss-120b` on Groq (reasoning effort medium) | adjudicator only | 50 comments, compact guideline | label, confidence, tags |
 
 - For `lang_uncertain` items every annotator also gives the language (`hi`, `bn` or `other`).
+- Annotator, model and set are taken from the label file names and the run, not stored per record.
+- English glosses are written only for the comments that go to human review (all 3-way splits and a random
+  150, seed 42), by Gemini after aggregation (`scripts/label_llm.py gloss`).
+- Claude relabelled the Hindi and Bengali gold translations from the translated text alone
+  (`labels_claude_gold_translated.jsonl`). Its Hindi labels are scored. Its Bengali labels are identical to its
+  Hindi labels on all 100 items (in both passes), so they are not an independent judgement of the Bengali text
+  and are marked "not independent" instead of being scored.
 - **Why gpt-oss is only an adjudicator.** On Groq's free tier (8,000 tokens/min, and a 200,000
   tokens/day limit that the docs list but may not apply to the free plan), it would need about 4 days for
   every comment. With reasoning effort `low` it labelled all 50 test comments None, so it runs at `medium`.
@@ -92,7 +99,42 @@ English Reddit comments). A stratified 100-row subset (59 Favour, 20 Against, 21
 once into Hindi and Bengali; the translations were written by Claude in the development session and are
 cached in `data/interim/gold_translations.csv`. Accuracy and Macro F1 against the human labels are in
 `results/llm_gold_check.json`. Agreement between the annotators is in `results/annotation_agreement.json`.
-Results not run yet at the time of writing.
+**Results (2026-11-18)** (from `results/annotation_agreement.json` and `results/llm_gold_check.json`):
+
+*Agreement between Claude and Gemini* (3,856 kept items):
+
+| | Overall | Hindi | Bengali | Bengali script | Devanagari | Latin | Mixed |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| Cohen's kappa | 0.717 | 0.699 | 0.735 | 0.738 | 0.712 | 0.670 | 0.756 |
+| Agreement (%) | 88.7 | 86.3 | 92.7 | 92.5 | 85.0 | 88.2 | 89.1 |
+
+*Final labels*
+- Claude and Gemini agree on 3,421 items.
+- Of the 435 disagreements, gpt-oss resolved 404; the 31 3-way splits are dropped (ids in
+  `data/interim/dropped_splits.csv`; no human review was run).
+- Fleiss' kappa (Claude, Gemini, gpt-oss) on the 300-comment sample: 0.784 (n = 294 kept). The sample is drawn
+  from comments where Claude and Gemini agree, so this mostly measures gpt-oss against their consensus and is
+  biased upward.
+- 57 of the 183 `lang_uncertain` comments were kept (30 Bengali, 27 Hindi).
+
+| Language | Favour | Against | None | Unlabelled (splits) |
+|---|---:|---:|---:|---:|
+| Hindi | 637 | 66 | 1,674 | 23 |
+| Bengali | 177 | 34 | 1,237 | 8 |
+
+*Gold check: each annotator against the human labels*
+
+| Annotator | English, all 303 (acc / Macro F1) | English, the 100 translated | Hindi translation | Bengali translation |
+|---|---|---|---|---|
+| Claude | 0.710 / 0.637 | 0.800 / 0.750 | 0.730 / 0.695 | not independent (= its Hindi labels) |
+| Gemini | 0.677 / 0.641 | 0.760 / 0.740 | 0.740 / 0.709 | 0.710 / 0.672 |
+| gpt-oss | 0.683 / 0.608 | 0.710 / 0.637 | not run | not run |
+
+ClimateStance counts policy opposition as Against and sarcasm as ambiguous, so these gold scores slightly
+underestimate agreement with our guideline.
+
+**Against is rare.** Against is only 100 of the 3,825 labelled comments (2.6%), consistent with only 4
+sceptic videos.
 
 **Limitation (romanised text).** The keyword rule cannot know every romanised spelling. 183 of the 493
 "other_language" comments have 3 or more tokens. A manual look suggests many of them are romanised Hindi or

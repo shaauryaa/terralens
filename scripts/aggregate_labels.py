@@ -51,7 +51,15 @@ MERGED_CSV = INTERIM / "labels_merged.csv"
 AGREEMENT_JSON = ROOT / "results" / "annotation_agreement.json"
 GOLD_JSON = ROOT / "results" / "llm_gold_check.json"
 ANNOTATORS = ["claude", "gemini", "gptoss"]
-MODELS = {"claude": "Claude (separate session)", "gemini": "gemini-3.5-flash-lite", "gptoss": "openai/gpt-oss-120b"}
+MODELS = {"claude": "Claude (separate Claude Code session, Sonnet)", "gemini": "gemini-3.5-flash-lite",
+          "gptoss": "openai/gpt-oss-120b (Groq, reasoning medium)"}
+# Claude's second pass on the Hindi / Bengali gold translations (labelled from the translated text alone).
+# Its records replace the first-pass hi / bn records in labels_claude_gold.jsonl.
+CLAUDE_GOLD_TRANSLATED = INTERIM / "labels_claude_gold_translated.jsonl"
+# Gold views not scored for an annotator, with the reason.
+EXCLUDED_GOLD_VIEWS = {"claude": {"bn": ("not independent: Claude's Bengali labels are identical to its Hindi "
+                                         "labels on all 100 items in both passes, so they are not an independent "
+                                         "judgement of the Bengali text; only Hindi is scored")}}
 SEED = 42
 
 
@@ -59,18 +67,17 @@ def now() -> str:
     return datetime.now(timezone.utc).isoformat(timespec="seconds")
 
 
-# Fields an annotator's records must have to be used (annotation/prompts/claude_session.md for Claude).
-REQUIRED_FIELDS = {"claude": ("gloss", "reason")}
+CONFIDENCES = {"high", "medium", "low"}
 REJECTED: dict[str, int] = {}
 
 
 def read_labels(path: Path, annotator: str | None = None) -> pd.DataFrame:
     """Valid label records from a JSONL file (last record wins for repeated ids).
 
-    Records missing a field in REQUIRED_FIELDS[annotator] are not used; their count is kept in REJECTED.
+    Required per record: id, label, confidence, tags (a list). Annotator, model and set come from the file
+    name and the run, not from the record. Rejected records are counted in REJECTED.
     """
-    cols = ["id", "label", "confidence", "tags", "lang", "gloss", "reason", "set"]
-    required = REQUIRED_FIELDS.get(annotator, ())
+    cols = ["id", "label", "confidence", "tags", "lang", "set"]
     REJECTED[path.name] = 0
     if not path.exists():
         return pd.DataFrame(columns=cols)
@@ -81,9 +88,8 @@ def read_labels(path: Path, annotator: str | None = None) -> pd.DataFrame:
                 r = json.loads(line)
             except json.JSONDecodeError:
                 continue
-            if r.get("label") not in LABELS:
-                continue
-            if any(not str(r.get(k) or "").strip() for k in required):
+            if (r.get("label") not in LABELS or str(r.get("confidence", "")).lower() not in CONFIDENCES
+                    or not isinstance(r.get("tags"), list) or not r.get("id")):
                 REJECTED[path.name] += 1
                 continue
             recs.append({c: r.get(c) for c in cols})
@@ -162,9 +168,6 @@ def merge(items: pd.DataFrame, labels: dict[str, pd.DataFrame]) -> pd.DataFrame:
         df[f"confidence_{a}"] = df["id"].map(lab["confidence"])
         df[f"tags_{a}"] = df["id"].map(lambda i, lab=lab: json.dumps(lab["tags"].get(i) or []) if i in lab.index else "")
         df[f"lang_{a}"] = df["id"].map(lab["lang"])
-    claude = labels["claude"].set_index("id")
-    df["gloss_claude"] = df["id"].map(claude["gloss"])
-    df["reason_claude"] = df["id"].map(claude["reason"])
     res = [resolve(*(None if pd.isna(r[f"label_{a}"]) else r[f"label_{a}"] for a in ANNOTATORS))
            for _, r in df.iterrows()]
     df["final_label"] = [r[0] for r in res]
@@ -220,6 +223,13 @@ def agreement_report(df: pd.DataFrame, labels: dict[str, pd.DataFrame]) -> dict:
 # ============================================================================================ gold check
 
 
+def with_translated(first: pd.DataFrame, second: pd.DataFrame) -> pd.DataFrame:
+    """First-pass gold labels with every id in ``second`` (the relabelled translations) replaced by ``second``."""
+    if second.empty:
+        return first
+    return pd.concat([first[~first["id"].isin(second["id"])], second], ignore_index=True)
+
+
 def score(gold: pd.Series, pred: pd.Series) -> dict:
     res = evaluate(gold, pred)
     return {
@@ -244,8 +254,8 @@ def gold_check(gold_items: pd.DataFrame, labels: dict[str, pd.DataFrame]) -> dic
         lab = labels[a].set_index("id")["label"]
         if lab.empty:
             rejected = REJECTED.get(f"labels_{a}_gold.jsonl", 0)
-            out["annotators"][a] = {"status": f"not scored: {rejected} records lack required fields "
-                                              f"{list(REQUIRED_FIELDS.get(a, ()))}" if rejected else "no gold labels yet"}
+            out["annotators"][a] = {"status": f"not scored: {rejected} invalid records" if rejected
+                                    else "no gold labels yet"}
             continue
         res = {"model": MODELS[a]}
         g = gold_items.assign(pred=gold_items["id"].map(lab))
@@ -257,6 +267,9 @@ def gold_check(gold_items: pd.DataFrame, labels: dict[str, pd.DataFrame]) -> dic
             "bn": g[g["set"] == "gold_bn"],
         }
         for name, v in views.items():
+            if name in EXCLUDED_GOLD_VIEWS.get(a, {}):
+                res[name] = {"n_expected": len(v), "status": EXCLUDED_GOLD_VIEWS[a][name]}
+                continue
             have = v.dropna(subset=["pred"])
             if len(v) == 0:
                 continue
@@ -274,6 +287,21 @@ def gold_check(gold_items: pd.DataFrame, labels: dict[str, pd.DataFrame]) -> dic
 
 
 # ============================================================================================ main
+
+
+def label_files() -> dict:
+    """Provenance of the label files used: lines and last modified time (annotator/model from the name)."""
+    out = {}
+    for path in sorted(INTERIM.glob("labels_*.jsonl")):
+        if path.stem.endswith(("_failures", "_requests")) or ".dryrun" in path.name:
+            continue
+        annotator = path.stem.removeprefix("labels_").removesuffix("_gold")
+        with path.open(encoding="utf-8") as f:
+            n = sum(1 for line in f if line.strip())
+        out[path.name] = {"annotator": annotator, "model": MODELS.get(annotator, ""), "lines": n,
+                          "rejected": REJECTED.get(path.name),
+                          "modified": datetime.fromtimestamp(path.stat().st_mtime, timezone.utc).isoformat(timespec="seconds")}
+    return out
 
 
 def write_json(path: Path, obj: dict) -> None:
@@ -306,8 +334,10 @@ def main(argv=None) -> None:
 
     gold_items = pd.read_csv(GOLD_ITEMS_CSV, dtype=str, keep_default_na=False)
     gold_labels = {a: read_labels(INTERIM / f"labels_{a}_gold.jsonl", a) for a in ANNOTATORS}
+    gold_labels["claude"] = with_translated(gold_labels["claude"], read_labels(CLAUDE_GOLD_TRANSLATED, "claude"))
     g = gold_check(gold_items.head(args.limit) if args.limit else gold_items, gold_labels)
     print_gold(g)
+    g["label_files"] = label_files()
     if not args.limit:
         write_json(GOLD_JSON, g)
     if args.gold_only:
@@ -321,6 +351,7 @@ def main(argv=None) -> None:
     report = agreement_report(merged, labels)
     print("\n" + json.dumps({k: report[k] for k in ("labelled", "kept_items", "adjudication", "label_source")}, indent=1))
     print("Claude vs Gemini:", json.dumps(report["claude_vs_gemini"]["overall"]))
+    report["label_files"] = label_files()
     if args.limit:
         print("Dry run: nothing written.")
         return

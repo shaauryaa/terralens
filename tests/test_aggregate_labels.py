@@ -56,14 +56,14 @@ def test_merge_and_agreement_report():
     items = pd.DataFrame({"id": ["a", "b", "c", "d", "e"], "video_id": "v", "text": "t",
                           "lang": ["hi", "hi", "bn", "bn", ""], "script": ["latin", "devanagari", "bengali", "bengali", "latin"],
                           "lang_uncertain": ["0", "0", "0", "0", "1"]})
-    lab = lambda rows: pd.DataFrame(rows, columns=["id", "label", "confidence", "tags", "lang", "gloss", "reason", "set"])
+    lab = lambda rows: pd.DataFrame(rows, columns=["id", "label", "confidence", "tags", "lang", "set"])
     labels = {
-        "claude": lab([[i, l, "high", [], lg, "g", "r", "main"] for i, l, lg in
+        "claude": lab([[i, l, "high", [], lg, "main"] for i, l, lg in
                        [("a", "Favour", None), ("b", "None", None), ("c", "Against", None), ("d", "None", None), ("e", "None", "hi")]]),
-        "gemini": lab([[i, l, "high", [], lg, None, None, "main"] for i, l, lg in
+        "gemini": lab([[i, l, "high", [], lg, "main"] for i, l, lg in
                        [("a", "Favour", None), ("b", "Favour", None), ("c", "None", None), ("d", "None", None), ("e", "None", "other")]]),
-        "gptoss": lab([["b", "Favour", "high", [], None, None, None, "disagreement"],
-                       ["c", "Favour", "high", [], None, None, None, "disagreement"]]),
+        "gptoss": lab([["b", "Favour", "high", [], None, "disagreement"],
+                       ["c", "Favour", "high", [], None, "disagreement"]]),
     }
     m = ag.merge(items, labels)
     assert m.set_index("id")["label_source"].to_dict() == {"a": "agree", "b": "adjudicated", "c": "split", "d": "agree", "e": "agree"}
@@ -89,11 +89,31 @@ def test_gold_check_scores_each_view():
     assert out["annotators"]["claude"] == {"status": "no gold labels yet"}
 
 
-def test_read_labels_rejects_claude_records_without_gloss_and_reason(tmp_path):
+def test_read_labels_schema_needs_no_gloss_or_set(tmp_path):
     p = tmp_path / "labels_claude.jsonl"
     p.write_text('{"id": "a", "label": "None", "confidence": "high", "tags": []}\n'
-                 '{"id": "b", "label": "Favour", "confidence": "high", "tags": [], "gloss": "g", "reason": "r"}\n',
+                 '{"id": "b", "label": "Favour", "confidence": "sure", "tags": []}\n'
+                 '{"id": "c", "label": "Favour", "confidence": "low", "tags": "x"}\n',
                  encoding="utf-8")
-    assert ag.read_labels(p, "claude")["id"].tolist() == ["b"]
-    assert ag.REJECTED["labels_claude.jsonl"] == 1
-    assert ag.read_labels(p, "gemini")["id"].tolist() == ["a", "b"]
+    assert ag.read_labels(p, "claude")["id"].tolist() == ["a"]
+    assert ag.REJECTED["labels_claude.jsonl"] == 2
+
+
+def test_claude_bengali_gold_is_not_scored_but_hindi_is():
+    gi = pd.DataFrame({"id": ["g1", "g1__hi", "g1__bn"], "gold_id": ["g1"] * 3, "set": ["gold_en", "gold_hi", "gold_bn"],
+                       "human_label": ["Favour"] * 3, "mapping_confidence": ["direct"] * 3})
+    pred = pd.DataFrame({"id": ["g1", "g1__hi", "g1__bn"], "label": ["Favour"] * 3})
+    empty = pd.DataFrame(columns=["id", "label"])
+    out = ag.gold_check(gi, {"claude": pred, "gemini": pred, "gptoss": empty})
+    assert out["annotators"]["claude"]["bn"]["status"].startswith("not independent")
+    assert out["annotators"]["claude"]["hi"]["accuracy"] == 1.0
+    assert out["annotators"]["claude"]["en_all"]["accuracy"] == 1.0
+    assert out["annotators"]["gemini"]["bn"]["accuracy"] == 1.0
+
+
+def test_with_translated_replaces_first_pass_records():
+    first = pd.DataFrame({"id": ["g1", "g1__hi", "g1__bn"], "label": ["Favour", "Favour", "Favour"]})
+    second = pd.DataFrame({"id": ["g1__hi", "g1__bn"], "label": ["None", "None"]})
+    out = ag.with_translated(first, second).set_index("id")["label"]
+    assert out.to_dict() == {"g1": "Favour", "g1__hi": "None", "g1__bn": "None"}
+    assert ag.with_translated(first, second.iloc[0:0]).equals(first)

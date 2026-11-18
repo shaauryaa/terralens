@@ -18,18 +18,19 @@ Label independently: do not open any `labels_gemini*` or `labels_gptoss*` file.
 - `data/interim/labels_claude.jsonl`: one line per id in `labelling_items.csv`
 - `data/interim/labels_claude_gold.jsonl`: one line per id in `gold_items.csv`
 
-Each line:
+Each line (required fields only; annotator, model and set come from the file name and the run):
 
 ```json
 {"id": "<id>", "label": "Favour|Against|None", "confidence": "high|medium|low",
- "tags": ["sarcasm", "negation", "implicit", "code_mixed", "romanised", "question"],
- "gloss": "faithful English translation", "reason": "one short sentence",
- "lang": "hi|bn|other", "annotator": "claude", "model": "<model id>", "set": "main|gold_en|gold_hi|gold_bn"}
+ "tags": ["sarcasm", "negation", "implicit", "code_mixed", "romanised", "question"], "lang": "hi|bn|other"}
 ```
 
-- `tags`: only those that apply, else `[]`.
+- `tags`: only those that apply, else `[]` (always a list).
 - `lang`: only for `lang_uncertain = 1` rows (Hindi, Bengali, or `other` for anything else incl. English).
-- For gold items, `gloss` may repeat the English text for `gold_en`.
+- `gloss` / `reason` are optional. English glosses for the comments that go to human review are written by
+  Gemini after aggregation (`python scripts/label_llm.py gloss`).
+- Gold translations (`gold_hi`, `gold_bn`): label each one from its translated text alone, as if you had
+  never seen the English original or its label.
 
 ## Procedure
 1. Work in batches of 100 rows, in file order. Before each batch, read the existing output file and skip ids

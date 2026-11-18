@@ -1,0 +1,152 @@
+{
+  "experiment_id": "annotation_agreement",
+  "script": "scripts/aggregate_labels.py",
+  "config": {
+    "annotators": {
+      "claude": "Claude (separate Claude Code session, Sonnet)",
+      "gemini": "gemini-3.5-flash-lite",
+      "gptoss": "openai/gpt-oss-120b (Groq, reasoning medium)"
+    },
+    "final_label_rule": "agree, else gpt-oss if it matches one, else split",
+    "lang_uncertain_rule": ">= 2 annotators say hi or bn"
+  },
+  "seed": 42,
+  "timestamp": "2026-11-18T08:44:15+00:00",
+  "items": 3981,
+  "labelled": {
+    "claude": 3981,
+    "gemini": 3981,
+    "gptoss": 746
+  },
+  "lang_uncertain": {
+    "items": 183,
+    "kept": 58,
+    "kept_by_lang": {
+      "bn": 31,
+      "hi": 27
+    }
+  },
+  "kept_items": 3856,
+  "claude_vs_gemini": {
+    "overall": {
+      "n": 3856,
+      "cohen_kappa": 0.7173,
+      "pct_agreement": 88.72
+    },
+    "by_lang": {
+      "bn": {
+        "n": 1456,
+        "cohen_kappa": 0.735,
+        "pct_agreement": 92.72
+      },
+      "hi": {
+        "n": 2400,
+        "cohen_kappa": 0.6994,
+        "pct_agreement": 86.29
+      }
+    },
+    "by_script": {
+      "bengali": {
+        "n": 1112,
+        "cohen_kappa": 0.7381,
+        "pct_agreement": 92.54
+      },
+      "devanagari": {
+        "n": 904,
+        "cohen_kappa": 0.7123,
+        "pct_agreement": 84.96
+      },
+      "latin": {
+        "n": 1730,
+        "cohen_kappa": 0.6699,
+        "pct_agreement": 88.21
+      },
+      "mixed": {
+        "n": 110,
+        "cohen_kappa": 0.7559,
+        "pct_agreement": 89.09
+      }
+    }
+  },
+  "adjudication": {
+    "disagreements": 435,
+    "sent_to_gptoss": 435,
+    "resolved_by_gptoss": 404,
+    "three_way_splits": 31,
+    "pending": 0
+  },
+  "label_source": {
+    "agree": 3421,
+    "adjudicated": 404,
+    "split": 31
+  },
+  "fleiss_kappa_sample": {
+    "n": 294,
+    "kappa": 0.784
+  },
+  "final_label_distribution": {
+    "bn": {
+      "Favour": 177,
+      "Against": 34,
+      "None": 1237,
+      "unlabelled": 8
+    },
+    "hi": {
+      "Favour": 637,
+      "Against": 66,
+      "None": 1674,
+      "unlabelled": 23
+    }
+  },
+  "label_files": {
+    "labels_claude.jsonl": {
+      "annotator": "claude",
+      "model": "Claude (separate Claude Code session, Sonnet)",
+      "lines": 3981,
+      "rejected": 0,
+      "modified": "2026-11-18T02:45:15+00:00"
+    },
+    "labels_claude_gold.jsonl": {
+      "annotator": "claude",
+      "model": "Claude (separate Claude Code session, Sonnet)",
+      "lines": 503,
+      "rejected": 0,
+      "modified": "2026-11-18T02:46:22+00:00"
+    },
+    "labels_claude_gold_translated.jsonl": {
+      "annotator": "claude_gold_translated",
+      "model": "",
+      "lines": 200,
+      "rejected": 0,
+      "modified": "2026-11-18T06:15:27+00:00"
+    },
+    "labels_gemini.jsonl": {
+      "annotator": "gemini",
+      "model": "gemini-3.5-flash-lite",
+      "lines": 3981,
+      "rejected": 0,
+      "modified": "2026-11-18T02:47:04+00:00"
+    },
+    "labels_gemini_gold.jsonl": {
+      "annotator": "gemini",
+      "model": "gemini-3.5-flash-lite",
+      "lines": 503,
+      "rejected": 0,
+      "modified": "2026-11-18T02:48:39+00:00"
+    },
+    "labels_gptoss.jsonl": {
+      "annotator": "gptoss",
+      "model": "openai/gpt-oss-120b (Groq, reasoning medium)",
+      "lines": 746,
+      "rejected": 0,
+      "modified": "2026-11-18T08:44:07+00:00"
+    },
+    "labels_gptoss_gold.jsonl": {
+      "annotator": "gptoss",
+      "model": "openai/gpt-oss-120b (Groq, reasoning medium)",
+      "lines": 303,
+      "rejected": 0,
+      "modified": "2026-11-18T06:35:41+00:00"
+    }
+  }
+}

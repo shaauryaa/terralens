@@ -2,12 +2,155 @@
   "experiment_id": "llm_gold_check",
   "script": "scripts/aggregate_labels.py",
   "seed": 42,
-  "timestamp": "2026-11-18T02:49:52+00:00",
+  "timestamp": "2026-11-18T08:44:13+00:00",
   "gold": "data/external/climatestance_gold.csv (303 Reddit comments both human annotators agreed on)",
   "note": "ClimateStance labels opposing climate policy as Against and sarcasm as ambiguous (None); our guideline says None for policy opposition and labels sarcasm by meaning, so these scores slightly underestimate agreement with our guideline",
   "annotators": {
     "claude": {
-      "status": "not scored: 503 records lack required fields ['gloss', 'reason']"
+      "model": "Claude (separate Claude Code session, Sonnet)",
+      "en_all": {
+        "n": 303,
+        "accuracy": 0.7096,
+        "macro_f1": 0.6374,
+        "per_class_f1": {
+          "Favour": 0.8184,
+          "Against": 0.6533,
+          "None": 0.4404
+        },
+        "confusion_matrix": {
+          "rows_gold_cols_pred": [
+            "Favour",
+            "Against",
+            "None"
+          ],
+          "matrix": [
+            [
+              142,
+              17,
+              19
+            ],
+            [
+              10,
+              49,
+              1
+            ],
+            [
+              17,
+              24,
+              24
+            ]
+          ]
+        },
+        "n_expected": 303,
+        "missing": 0
+      },
+      "en_direct": {
+        "n": 178,
+        "accuracy": 0.7978,
+        "confusion_matrix": {
+          "rows_gold_cols_pred": [
+            "Favour",
+            "Against",
+            "None"
+          ],
+          "matrix": [
+            [
+              142,
+              17,
+              19
+            ],
+            [
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0
+            ]
+          ]
+        },
+        "n_expected": 178,
+        "missing": 0,
+        "note": "all direct rows are human Favour; accuracy = recall of Favour"
+      },
+      "en_translation_subset": {
+        "n": 100,
+        "accuracy": 0.8,
+        "macro_f1": 0.7497,
+        "per_class_f1": {
+          "Favour": 0.8689,
+          "Against": 0.7317,
+          "None": 0.6486
+        },
+        "confusion_matrix": {
+          "rows_gold_cols_pred": [
+            "Favour",
+            "Against",
+            "None"
+          ],
+          "matrix": [
+            [
+              53,
+              2,
+              4
+            ],
+            [
+              5,
+              15,
+              0
+            ],
+            [
+              5,
+              4,
+              12
+            ]
+          ]
+        },
+        "n_expected": 100,
+        "missing": 0
+      },
+      "hi": {
+        "n": 100,
+        "accuracy": 0.73,
+        "macro_f1": 0.695,
+        "per_class_f1": {
+          "Favour": 0.8174,
+          "Against": 0.7778,
+          "None": 0.4898
+        },
+        "confusion_matrix": {
+          "rows_gold_cols_pred": [
+            "Favour",
+            "Against",
+            "None"
+          ],
+          "matrix": [
+            [
+              47,
+              0,
+              12
+            ],
+            [
+              2,
+              14,
+              4
+            ],
+            [
+              7,
+              2,
+              12
+            ]
+          ]
+        },
+        "n_expected": 100,
+        "missing": 0
+      },
+      "bn": {
+        "n_expected": 100,
+        "status": "not independent: Claude's Bengali labels are identical to its Hindi labels on all 100 items in both passes, so they are not an independent judgement of the Bengali text; only Hindi is scored"
+      }
     },
     "gemini": {
       "model": "gemini-3.5-flash-lite",
@@ -188,7 +331,169 @@
       }
     },
     "gptoss": {
-      "status": "no gold labels yet"
+      "model": "openai/gpt-oss-120b (Groq, reasoning medium)",
+      "en_all": {
+        "n": 303,
+        "accuracy": 0.6832,
+        "macro_f1": 0.6079,
+        "per_class_f1": {
+          "Favour": 0.8184,
+          "Against": 0.5625,
+          "None": 0.4427
+        },
+        "confusion_matrix": {
+          "rows_gold_cols_pred": [
+            "Favour",
+            "Against",
+            "None"
+          ],
+          "matrix": [
+            [
+              142,
+              12,
+              24
+            ],
+            [
+              11,
+              36,
+              13
+            ],
+            [
+              16,
+              20,
+              29
+            ]
+          ]
+        },
+        "n_expected": 303,
+        "missing": 0
+      },
+      "en_direct": {
+        "n": 178,
+        "accuracy": 0.7978,
+        "confusion_matrix": {
+          "rows_gold_cols_pred": [
+            "Favour",
+            "Against",
+            "None"
+          ],
+          "matrix": [
+            [
+              142,
+              12,
+              24
+            ],
+            [
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0
+            ]
+          ]
+        },
+        "n_expected": 178,
+        "missing": 0,
+        "note": "all direct rows are human Favour; accuracy = recall of Favour"
+      },
+      "en_translation_subset": {
+        "n": 100,
+        "accuracy": 0.71,
+        "macro_f1": 0.6371,
+        "per_class_f1": {
+          "Favour": 0.8235,
+          "Against": 0.6,
+          "None": 0.4878
+        },
+        "confusion_matrix": {
+          "rows_gold_cols_pred": [
+            "Favour",
+            "Against",
+            "None"
+          ],
+          "matrix": [
+            [
+              49,
+              3,
+              7
+            ],
+            [
+              5,
+              12,
+              3
+            ],
+            [
+              6,
+              5,
+              10
+            ]
+          ]
+        },
+        "n_expected": 100,
+        "missing": 0
+      },
+      "hi": {
+        "n_expected": 100,
+        "status": "not labelled"
+      },
+      "bn": {
+        "n_expected": 100,
+        "status": "not labelled"
+      }
+    }
+  },
+  "label_files": {
+    "labels_claude.jsonl": {
+      "annotator": "claude",
+      "model": "Claude (separate Claude Code session, Sonnet)",
+      "lines": 3981,
+      "rejected": null,
+      "modified": "2026-11-18T02:45:15+00:00"
+    },
+    "labels_claude_gold.jsonl": {
+      "annotator": "claude",
+      "model": "Claude (separate Claude Code session, Sonnet)",
+      "lines": 503,
+      "rejected": 0,
+      "modified": "2026-11-18T02:46:22+00:00"
+    },
+    "labels_claude_gold_translated.jsonl": {
+      "annotator": "claude_gold_translated",
+      "model": "",
+      "lines": 200,
+      "rejected": 0,
+      "modified": "2026-11-18T06:15:27+00:00"
+    },
+    "labels_gemini.jsonl": {
+      "annotator": "gemini",
+      "model": "gemini-3.5-flash-lite",
+      "lines": 3981,
+      "rejected": null,
+      "modified": "2026-11-18T02:47:04+00:00"
+    },
+    "labels_gemini_gold.jsonl": {
+      "annotator": "gemini",
+      "model": "gemini-3.5-flash-lite",
+      "lines": 503,
+      "rejected": 0,
+      "modified": "2026-11-18T02:48:39+00:00"
+    },
+    "labels_gptoss.jsonl": {
+      "annotator": "gptoss",
+      "model": "openai/gpt-oss-120b (Groq, reasoning medium)",
+      "lines": 746,
+      "rejected": null,
+      "modified": "2026-11-18T08:44:07+00:00"
+    },
+    "labels_gptoss_gold.jsonl": {
+      "annotator": "gptoss",
+      "model": "openai/gpt-oss-120b (Groq, reasoning medium)",
+      "lines": 303,
+      "rejected": 0,
+      "modified": "2026-11-18T06:35:41+00:00"
     }
   }
 }
