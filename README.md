@@ -59,7 +59,7 @@ model.
    10 empty, 354 emoji-only, 1,264 English, 493 other-language and 236 too-short comments, plus 60 exact and
    9 near duplicates, leaving 3,798 (`results/comment_cleaning.json`). 183 comments whose language was
    uncertain were also sent for labelling; 58 were kept because at least two annotators said Hindi or Bengali.
-2. **Two full annotators.** Claude (a separate Claude Code session, Sonnet) and Gemini
+2. **Two full annotators.** Claude (Sonnet, run in a separate session) and Gemini
    (gemini-3.5-flash-lite) labelled every one of the 3,981 items with the same guideline
    (`annotation/guidelines.md`). On the 3,856 kept items they agree on 88.72%, **Cohen's kappa 0.7173**
    (Hindi 0.6994, Bengali 0.735).
@@ -229,7 +229,7 @@ python scripts/merge_and_dedup.py
 python scripts/label_llm.py prepare
 python scripts/label_llm.py run --annotator gemini --set gold
 python scripts/label_llm.py run --annotator gemini --set main
-#    Claude labels the same items in a separate Claude Code session (annotation/prompts/claude_session.md)
+#    Claude (Sonnet) labels the same items in a separate session (annotation/prompts/claude_session.md)
 python scripts/label_llm.py validate --annotator claude
 python scripts/label_llm.py adjudicate
 python scripts/aggregate_labels.py

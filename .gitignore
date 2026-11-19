@@ -33,8 +33,10 @@ wandb/
 *.gguf
 *.onnx
 
-# --- Claude Code (per-user) ---
-.claude/settings.local.json
+# --- Local assistant files (not part of the project) ---
+CLAUDE.md
+TASKS.md
+.claude/
 
 # --- Python ---
 __pycache__/

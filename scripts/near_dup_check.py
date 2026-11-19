@@ -1,5 +1,5 @@
 """Near-duplicate check of training-only data (B translated, C romanised, D synthetic) against val, test and the
-challenge set (CLAUDE.md data rule 5). Matches are dropped from the training files in place.
+challenge set (project data rule 5). Matches are dropped from the training files in place.
 
 Same similarity as T3 (scripts/merge_and_dedup.py): char_wb 3-5-gram TF-IDF (sublinear), cosine > 0.9, on
 cleaned lower-cased text. The vectoriser is fitted on the held-out texts plus the candidate file. Also drops
